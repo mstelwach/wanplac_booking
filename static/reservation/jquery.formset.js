@@ -72,7 +72,15 @@
                 } else {
                     // Otherwise, just insert the remove button as the
                     // last child element of the form's container:
-                    row.append('<a class="' + options.deleteCssClass + '" href="javascript:void(0)">' + options.deleteText +'</a>');
+                    const addButtonTemplate = `<div class="col-sm-2">
+                        <div class="form-group">
+                            <span class="form-label"><br></span>
+                                <a class="${options.deleteCssClass}" style="display: block; width: 55%; line-height: 190%;" href="javascript:void(0)"><i class="fa fa-minus"></i></a>
+                            </div>
+                        </div>
+                     `;
+                    // row.append('<a class="' + options.deleteCssClass + '" href="javascript:void(0)">' + options.deleteText +'</a>');
+                    row.append(addButtonTemplate);
                 }
                 // Check if we're under the minimum number of forms - not to display delete link at rendering
                 if (!showDeleteLinks()){

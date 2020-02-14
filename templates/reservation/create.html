@@ -61,7 +61,9 @@
                                 <span class="form-label">Ilość</span>
                                 {% render_field form.quantity class+='form-control' %}
                             </div>
+
                         </div>
+
                     </div>
                     {% endfor %}
                     <br>
@@ -77,9 +79,8 @@
            <script>
                 $('.formset_row-{{ formset.prefix }}').formset({
                     addText: 'Dodaj kolejny',
-                    deleteText: 'Usuń',
-                    addCssClass: 'btn btn-success add-form-row',
-                    deleteCssClass: 'btn btn-success add-form-row',
+                    addCssClass: 'btn btn-success',
+                    deleteCssClass: 'btn btn-danger',
                     prefix: '{{ formset.prefix }}',
                 });
             </script>

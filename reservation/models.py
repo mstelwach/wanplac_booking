@@ -3,9 +3,16 @@ from django.db import models
 
 
 class Kayak(models.Model):
+    NUMBER_TYPE = [
+        ('1', 'Jednoosobowy'),
+        ('2', 'Dwuosobowy'),
+        ('3', 'Trzyosobowy')
+    ]
+
     name = models.CharField(max_length=32)
     quantity = models.IntegerField()
     available = models.BooleanField()
+    number_type = models.CharField(max_length=32, choices=NUMBER_TYPE)
 
     def __str__(self):
         return 'Model: {} | Quantity: {}'.format(self.name, self.quantity)
