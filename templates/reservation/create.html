@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% load widget_tweaks %}
+{% load static %}
+
+<head>
+
+    {% block head_scripts_additional %}
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
+	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/bootstrap.min.css' %}" />
+	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/style.css' %}" />
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    {% endblock %}
+
+</head>
+
+{% block content %}
+        <div class="row">
+            <div class="booking-form">
+                <form role="form" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <span class="form-label">Imię klienta</span>
+                            {% render_field form.first_name class+='form-control' %}
+                    </div>
+                    <div class="form-group">
+                        <span class="form-label">Nazwisko klienta</span>
+                        {% render_field form.last_name class+='form-control' %}
+                    </div>
+                    <div class="row no-margin">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <span class="form-label">Data</span>
+                                {% render_field form.term class+='form-control' %}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <span class="form-label">Godzina</span>
+                                {% render_field form.time class+='form-control' %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <span class="form-label">Trasa wyprawy</span>
+                        {% render_field form.route class+='form-control' %}
+                        <span class="select-arrow"></span>
+                    </div>
+                    {{ kayaks.management_form }}
+                    {% for form in kayaks.forms %}
+                    <div class="row no-margin {% cycle 'row1' 'row2' %} formset_row-{{ formset.prefix }}">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <span class="form-label">Kajak</span>
+                                {% render_field form.kayak class+='form-control' %}
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <span class="form-label">Ilość</span>
+                                {% render_field form.quantity class+='form-control' %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <br>
+                    <br>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-block btn-primary">Rezerwacja <i class="fas fa-sign-in-alt"></i></button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+            <script src="{% static 'reservation/jquery.formset.js'%}"></script>
+           <script>
+                $('.formset_row-{{ formset.prefix }}').formset({
+                    addText: 'Dodaj kolejny',
+                    deleteText: 'Usuń',
+                    addCssClass: 'btn btn-success add-form-row',
+                    deleteCssClass: 'btn btn-success add-form-row',
+                    prefix: '{{ formset.prefix }}',
+                });
+            </script>
+
+    {% block body_scripts_additional %}
+        <script>
+            $(document).ready(function() {
+
+                $('#id_time').pickatime({
+                    // Time limits
+                    min: [9,0],
+                    max: [12,0],
+                    // Time intervals
+                    interval: 15,
+                    // Editable input
+                    editable: false,
+                    // Formats
+                    format: 'H:i',
+                    formatSubmit: 'H:i',
+                    {#formatLabel: '<b>H</b>:i',#}
+                    formatLabel: function(time) {
+                        var hours = ( time.pick - this.get('now').pick ) / 60,
+                          label = hours < 0 ? ' !hours to now' : hours > 0 ? ' !hours from now' : 'now'
+                        return  'H:i <sm!all>' + ( hours ? Math.abs(hours) : '' ) + label +'</sm!all>'
+                        }
+                  });
+                $('#id_term').pickadate({
+                    // Date limits
+                    min: -1,
+                    max: 6,
+                    // Formats
+                    format: 'yyyy-mm-dd',
+                    {#format: 'You selecte!d: dddd | dd mmm, yyyy',#}
+                    formatSubmit: 'yyyy-mm-dd',
+                    // Dropdown selectors
+                    selectMonth: false,
+                    selectYear: false,
+                    // Editable input
+                    editable: false,
+                });
+
+            });
+
+        </script>
+    {% endblock %}
+
+{% endblock %}
+

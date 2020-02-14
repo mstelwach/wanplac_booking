@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %} Moje rezerwacje {% endblock %}
+{% block head_scripts_additional %}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/list.css' %}" />
+{% endblock %}
+{% block content %}
+
+
+
+{% for reservation in object_list %}
+{#    <div class="card">#}
+{#      <div class="card-body">#}
+{#         <div class="row">#}
+{#             <div class="col-sm-9">#}
+{#                 <h2>{{reservation}}</h2>#}
+{#             </div>#}
+{#         </div>#}
+{#          <div class="row">#}
+{#            <p class="desc">{{reservation.term}}</p>#}
+{#              <p class="desc">{{reservation.time}}</p>#}
+{#          </div>#}
+{#      </div>#}
+{#    </div>#}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-todo-input-wrap">
+                <div class="main-todo-input fl-wrap todo-listing">
+                    <ul id="list-items">{{ reservation }}</ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock %}

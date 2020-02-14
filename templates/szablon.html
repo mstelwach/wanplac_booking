@@ -1,0 +1,31 @@
+{#{% load staticfiles %}#}
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+{#    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">#}
+{#    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>#}
+    <link rel="stylesheet" href="{% static 'pickadate/themes/default.css' %}">
+    <link rel="stylesheet" href="{% static 'pickadate/themes/default.date.css' %}">
+    <link rel="stylesheet" href="{% static 'pickadate/themes/default.time.css' %}">
+    <title>{% block title %} {% endblock %}</title>
+
+</head>
+<body>
+    {% block body %} {% endblock %}
+    {% block body_scripts %}
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="{% static 'pickadate/lib/picker.js' %}"></script>
+        <script src="{% static 'pickadate/lib/picker.date.js' %}"></script>
+        <script src="{% static 'pickadate/lib/picker.time.js' %}"></script>
+        <script src="{% static 'pickadate/lib/pl_PL.js' %}"></script>
+    {% endblock %}
+</body>
+</html>
