@@ -2,38 +2,81 @@
 {% load bootstrap4 %}
 {% load widget_tweaks %}
 {% load static %}
+{% load mathfilters %}
 
+<head>
 {% block title %} Moje rezerwacje {% endblock %}
-{% block head_scripts_additional %}
-    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/list.css' %}" />
-{% endblock %}
+    {% block head_scripts_additional %}
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <link rel="stylesheet" href="{% static 'css/reservation/list.css' %}">
+    {% endblock %}
+</head>
+
 {% block content %}
 
+    <div class="list-group" id="myList">
+        {% for reservation in object_list %}
+              <a href="" class="list-group-item list-group-item-action flex-column align-items-start booking-container">
+                  <div class="d-flex w-100 justify-content-between col-sm col-lg">
+                      <h5 class="mb-1">Rezerwacja nr. {{ reservation.id }} na {{ reservation.first_name }} {{ reservation.last_name }}</h5>
+                  </div>
+                  <div class="d-flex w-100 justify-content-between col-sm col-lg">
+                      <p class="mb-1">Trasa: {{ reservation.route }}</p>
+                      <p class="mb-2 tab-text">Sprzęt: <b>Rozwiń</b></p>
+                  </div>
+{#                  <div class="col-sm-6 col-lg-5">#}
+{#                      <small class="tex">Kliknij aby zobaczyć wynajęty sprzęt</small>#}
+{#                  </div>#}
+                  <div class="col-sm-10 col-lg-12">
+                      <small class="pull-right">Aktywna</small><span class="dot dot-success pull-right"></span>
+                      <br>
+                      <small class="pull-right">Data rezerwacji: {{ reservation.date|date:'Y-m-d' }}, godz: {{ reservation.time|time:'h:i'}}</small>
+                  </div>
+                  <br>
+                  <br>
+              </a>
 
-
-{% for reservation in object_list %}
-{#    <div class="card">#}
-{#      <div class="card-body">#}
-{#         <div class="row">#}
-{#             <div class="col-sm-9">#}
-{#                 <h2>{{reservation}}</h2>#}
-{#             </div>#}
-{#         </div>#}
-{#          <div class="row">#}
-{#            <p class="desc">{{reservation.term}}</p>#}
-{#              <p class="desc">{{reservation.time}}</p>#}
-{#          </div>#}
-{#      </div>#}
-{#    </div>#}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="main-todo-input-wrap">
-                <div class="main-todo-input fl-wrap todo-listing">
-                    <ul id="list-items">{{ reservation }}</ul>
-                </div>
-            </div>
-        </div>
+              <div class="list-group-item list-group-item-action flex-column align-items hide">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Sprzęt:</h5>
+                    {% for item in reservation.kayaks.all %}
+                        <p class="mb-1">Typ: {{ item.kayak.name }} | Ilośc: {{ item.quantity }}</p>
+                        {% endfor %}
+                  </div>
+              </div>
+            <br>
+    {% endfor %}
     </div>
-{% endfor %}
 
+
+{#    {% block body_scripts_additional %}#}
+        <script>
+            $(document).ready(function() {
+                $('.booking-container').on('click', function (e) {
+                  e.preventDefault();
+                  const bookingHeader = this;
+                  const elementTab = this.querySelector('.tab-text');
+
+                  {#console.log(elementTab.firstElementChild);#}
+                  if (bookingHeader.classList.contains('active')) {
+                      bookingHeader.classList.remove('active');
+                      elementTab.firstElementChild.innerHTML = 'Rozwiń'
+                  }
+                  else {
+                      bookingHeader.classList.add('active');
+                      elementTab.firstElementChild.innerHTML = 'Schowaj'
+                  }
+
+                  const bookingDetail = this.nextElementSibling;
+                    if (bookingDetail.classList.contains('hide')) {
+                        bookingDetail.classList.remove('hide')
+                    }
+                    else {
+                        bookingDetail.classList.add('hide')
+                    }
+                });
+            });
+        </script>
+{#    {% endblock %}#}
 {% endblock %}
+

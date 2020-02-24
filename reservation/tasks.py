@@ -7,10 +7,13 @@ from reservation.models import Reservation, Kayak
 
 
 @shared_task
-def check_quantity_kayak():
-    now = datetime.date.today()
-    yesterday = now - datetime.timedelta(days=1)
-    queryset = Reservation.objects.filter(term__endswith=yesterday)
+def check_quantity_kayak(hour):
+    if hour >= 12:
+        term = datetime.date.today()
+    else:
+        term = datetime.date.today() - datetime.timedelta(days=1)
+
+    queryset = Reservation.objects.filter(term__endswith=term)
     d = {}
     for reservation in queryset:
         for item in reservation.kayaks.all():
@@ -19,8 +22,8 @@ def check_quantity_kayak():
             else:
                 d[item.kayak.name] += item.quantity
 
-        object = Reservation.objects.get(pk=reservation.id)
-        object.delete()
+        # object = Reservation.objects.get(pk=reservation.id)
+        # object.delete()
 
     for name, quantity in d.items():
         object = Kayak.objects.get(name=name)

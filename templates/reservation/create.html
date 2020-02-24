@@ -7,9 +7,10 @@
 
     {% block head_scripts_additional %}
         <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
-	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/bootstrap.min.css' %}" />
-	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/style.css' %}" />
-        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/bootstrap.min.css' %}" />
+	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/style.css' %}" />
+{#        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>#}
+{#        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
 
     {% endblock %}
 
@@ -32,7 +33,7 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <span class="form-label">Data</span>
-                                {% render_field form.term class+='form-control' %}
+                                {% render_field form.date class+='form-control' %}
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -49,7 +50,7 @@
                     </div>
                     {{ kayaks.management_form }}
                     {% for form in kayaks.forms %}
-                    <div class="row no-margin {% cycle 'row1' 'row2' %} formset_row-{{ formset.prefix }}">
+                    <div class="row form-row spacer no-margin {% cycle 'row1' 'row2' %} formset_row-{{ kayaks.prefix }}">
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <span class="form-label">Kajak</span>
@@ -60,9 +61,19 @@
                             <div class="form-group">
                                 <span class="form-label">Ilość</span>
                                 {% render_field form.quantity class+='form-control' %}
+                                            <div class="input-group-append">
+                <button class="btn btn-success add-form-row">+</button>
+            </div>
                             </div>
 
                         </div>
+{#                        `<div class="col-sm-2">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label"><br></span>#}
+{#                                    <button class="btn btn-success add-form-row">+</button>#}
+{#                                    <a class="${options.deleteCssClass}" style="display: block; width: 55%; line-height: 190%;" href="javascript:void(0)"><i class="fa fa-minus"></i></a>#}
+{#                                </div>#}
+{#                        </div>#}
 
                     </div>
                     {% endfor %}
@@ -75,17 +86,21 @@
 
             </div>
         </div>
-            <script src="{% static 'reservation/jquery.formset.js'%}"></script>
-           <script>
-                $('.formset_row-{{ formset.prefix }}').formset({
-                    addText: 'Dodaj kolejny',
-                    addCssClass: 'btn btn-success',
-                    deleteCssClass: 'btn btn-danger',
-                    prefix: '{{ formset.prefix }}',
-                });
-            </script>
+{% endblock %}
+
+{#            <script src="{% static 'reservation/jquery.formset.js'%}"></script>#}
+{#           <script>#}
+{#                $('.formset_row-{{ kayaks.prefix }}').formset({#}
+{#                    addText: 'Dodaj kolejny',#}
+{#                    addCssClass: 'btn btn-success',#}
+{#                    deleteCssClass: 'btn btn-danger',#}
+{#                    prefix: '{{ kayaks.prefix }}',#}
+{#                });#}
+{#            </script>#}
 
     {% block body_scripts_additional %}
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+{#        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>#}
         <script>
             $(document).ready(function() {
 
@@ -107,7 +122,7 @@
                         return  'H:i <sm!all>' + ( hours ? Math.abs(hours) : '' ) + label +'</sm!all>'
                         }
                   });
-                $('#id_term').pickadate({
+                $('#id_date').pickadate({
                     // Date limits
                     min: -1,
                     max: 6,
@@ -125,7 +140,64 @@
             });
 
         </script>
+        <script type='text/javascript'>
+            function updateElementIndex(el, prefix, ndx) {
+                var id_regex = new RegExp('(' + prefix + '-\\d+)');
+                var replacement = prefix + '-' + ndx;
+                if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+                if (el.id) el.id = el.id.replace(id_regex, replacement);
+                if (el.name) el.name = el.name.replace(id_regex, replacement);
+            }
+            function cloneMore(selector, prefix) {
+                var newElement = $(selector).clone(true);
+                var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+                newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+                    var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+                    var id = 'id_' + name;
+                    $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+                });
+                newElement.find('label').each(function() {
+                    var forValue = $(this).attr('for');
+                    if (forValue) {
+                      forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+                      $(this).attr({'for': forValue});
+                    }
+                });
+                total++;
+                $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+                $(selector).after(newElement);
+                var conditionRow = $('.form-row:not(:last)');
+                conditionRow.find('.btn.add-form-row')
+                .removeClass('btn-success').addClass('btn-danger')
+                .removeClass('add-form-row').addClass('remove-form-row')
+                .html('<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>');
+                return false;
+            }
+            function deleteForm(prefix, btn) {
+                var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+                if (total > 1){
+                    btn.closest('.form-row').remove();
+                    var forms = $('.form-row');
+                    $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+                    for (var i=0, formCount=forms.length; i<formCount; i++) {
+                        $(forms.get(i)).find(':input').each(function() {
+                            updateElementIndex(this, prefix, i);
+                        });
+                    }
+                }
+                return false;
+            }
+            $(document).on('click', '.add-form-row', function(e){
+                e.preventDefault();
+                cloneMore('.form-row:last', 'form');
+                return false;
+            });
+            $(document).on('click', '.remove-form-row', function(e){
+                e.preventDefault();
+                deleteForm('form', $(this));
+                return false;
+            });
+        </script>
     {% endblock %}
 
-{% endblock %}
 

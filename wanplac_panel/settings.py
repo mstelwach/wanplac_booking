@@ -24,7 +24,7 @@ SECRET_KEY = '2!+)sjv)&vq!haza!+7p9w&nmuq+23w$=ptq@$gn@ht4b8#p@@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['172.20.10.2', '127.0.0.1']
 
 
 # Application definition
@@ -42,7 +42,10 @@ INSTALLED_APPS = [
     'dynamic_formsets',
     'celery',
     'django_celery_results',
-    'widget_tweaks'
+    'widget_tweaks',
+    'django_tables2',
+    'bootstrap_pagination',
+    'mathfilters'
 ]
 
 MIDDLEWARE = [
