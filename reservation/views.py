@@ -1,11 +1,13 @@
+from _decimal import Decimal
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DetailView
+from getpaid.forms import PaymentMethodForm
+
 from reservation.forms import ReservationCreateUpdateForm, ReservationKayakFormSet
 from reservation.models import Reservation, Kayak
 from reservation.tasks import check_quantity_kayak
@@ -45,25 +47,25 @@ class ReservationListView(LoginRequiredMixin, ListView):
 class ReservationCreateView(LoginRequiredMixin, CreateView):
     model = Reservation
     form_class = ReservationCreateUpdateForm
-    template_name = 'reservation/create2.html'
-    success_url = reverse_lazy('reservation:list')
+    template_name = 'reservation/create.html'
+
+    def get_success_url(self):
+        if self.object.payment == 'cash':
+            return reverse_lazy('reservation:list')
+        return reverse_lazy('reservation:payu-process', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
-        data = super(ReservationCreateView, self).get_context_data(**kwargs)
-
+        context = super(ReservationCreateView, self).get_context_data(**kwargs)
         if self.request.POST:
-            data['kayaks'] = ReservationKayakFormSet(self.request.POST, instance=self.object)
+            context['kayaks'] = ReservationKayakFormSet(self.request.POST, instance=self.object)
         else:
-            data['kayaks'] = ReservationKayakFormSet(instance=self.object)
-
-        data['inputKayaks'] = [kayak for kayak in Kayak.objects.all()]
-        return data
+            context['kayaks'] = ReservationKayakFormSet(instance=self.object)
+        return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         kayaks = context['kayaks']
         with transaction.atomic():
-            # kayak_saved = False
             if not form.cleaned_data['first_name']:
                 form.instance.first_name = self.request.user.first_name
             if not form.cleaned_data['last_name']:
@@ -78,9 +80,14 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
                     if not detail.kayak.stock:
                         detail.kayak.available = False
                     detail.kayak.save()
-                # kayak_saved = True
-            #
-            # if not kayak_saved:
-                # raise ValidationError('No kayaks are valid')
         return super(ReservationCreateView, self).form_valid(form)
 
+
+class ReservationPayUPaymentView(DetailView):
+    model = Reservation
+    template_name = 'reservation/payu_payment.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ReservationPayUPaymentView, self).get_context_data(**kwargs)
+        context['payment_form'] = PaymentMethodForm(self.object.currency, initial={'order': self.object})
+        return context

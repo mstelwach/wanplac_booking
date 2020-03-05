@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+
+<head>
+    <title>PayU Process</title>
+
+</head>
+{% block content %}
+    <h1>Rezerwacja opłacona</h1>
+    <div class="breadcrumps">
+        <ul>
+{#                        <li>{% trans 'Store' %}</li>#}
+{#                        <li>{% trans 'Order complete' %}</li>#}
+        </ul>
+    </div>
+    <div class="pageContent single-page">
+        <div class="container">
+            <div class="page-content post-content box">
+
+                <h1>Dziękujemy za dokonanie rezerwacji.</h1>
+                <h2>Twoja rezerwacja została opłacona</h2>
+{#                    <p>{% trans 'You should receive a confirmation of order submission to the given e-mail.' %}</p>#}
+{#                    <p>{% trans 'At the same address, we will inform you about the changes in the status of the order. Also we will send You access data for our client zone, where You can download updated software, and manage your licences.' %}</p>#}
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

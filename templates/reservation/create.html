@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load bootstrap4 %}
 {% load widget_tweaks %}
 {% load static %}
@@ -9,99 +9,193 @@
         <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
 	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/bootstrap.min.css' %}" />
 	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/style.css' %}" />
-{#        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>#}
-{#        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
 
     {% endblock %}
 
 </head>
 
 {% block content %}
-        <div class="row">
-            <div class="booking-form">
-                <form role="form" method="post">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <span class="form-label">Imię klienta</span>
-                            {% render_field form.first_name class+='form-control' %}
-                    </div>
-                    <div class="form-group">
-                        <span class="form-label">Nazwisko klienta</span>
-                        {% render_field form.last_name class+='form-control' %}
-                    </div>
-                    <div class="row no-margin">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <span class="form-label">Data</span>
-                                {% render_field form.date class+='form-control' %}
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <span class="form-label">Godzina</span>
-                                {% render_field form.time class+='form-control' %}
-                            </div>
+    <div class="row spacer">
+        <div class="booking-form">
+            <form  role=form method="post">
+            {% csrf_token %}
+
+                <div class="form-group">
+                    <span class="form-label">Imię klienta</span>
+                    {% render_field form.first_name class+='form-control' %}
+                </div>
+                <div class="form-group">
+                    <span class="form-label">Nazwisko klienta</span>
+                    {% render_field form.last_name class+='form-control' %}
+                </div>
+                <div class="row no-margin">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <span class="form-label">Data</span>
+                            {% render_field form.date class+='form-control' %}
                         </div>
                     </div>
-                    <div class="form-group">
-                        <span class="form-label">Trasa wyprawy</span>
-                        {% render_field form.route class+='form-control' %}
-                        <span class="select-arrow"></span>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <span class="form-label">Godzina</span>
+                            {% render_field form.time class+='form-control' %}
+                        </div>
                     </div>
-                    {{ kayaks.management_form }}
-                    {% for form in kayaks.forms %}
-                    <div class="row form-row spacer no-margin {% cycle 'row1' 'row2' %} formset_row-{{ kayaks.prefix }}">
-                        <div class="col-sm-6">
+                </div>
+                 <div class="form-group">
+                    <span class="form-label">Telefon</span>
+                    {% render_field form.phone class+='form-control' %}
+                    <span class="select-arrow"></span>
+                </div>
+                <div class="form-group">
+                    <span class="form-label">Trasa wyprawy</span>
+                    {% render_field form.route class+='form-control' %}
+                    <span class="select-arrow"></span>
+                </div>
+                <div class="form-group">
+                    <span class="form-label">Forma płatności</span>
+                    {% render_field form.payment class+='form-control' %}
+                </div>
+                {{ kayaks.management_form }}
+                {% for form in kayaks %}
+                <div class="row form-row spacer no-margin">
+                      <div class="col-sm-7">
                             <div class="form-group">
                                 <span class="form-label">Kajak</span>
-                                {% render_field form.kayak class+='form-control' %}
+                                {% render_field form.kayak class+='form-control' onchange="changeFunc(this);"%}
+                                <span class="select-arrow"></span>
+                            </div>
+                      </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <span class="form-label">Ilość</span>
+                                {% render_field form.quantity disabled='disabled' class+='form-control' onchange="checkQuantity(this);" %}
                             </div>
                         </div>
                         <div class="col-sm-2">
                             <div class="form-group">
-                                <span class="form-label">Ilość</span>
-                                {% render_field form.quantity class+='form-control' %}
-                                            <div class="input-group-append">
-                <button class="btn btn-success add-form-row">+</button>
-            </div>
+                                <span class="form-label"><br></span>
+                                <button disabled class="btn btn-success add-form-row" style="display: block; width: 50%; height: 40px; padding: 6px 12px; border: 4px; line-height: 1.42857143">+</button>
                             </div>
-
                         </div>
-{#                        `<div class="col-sm-2">#}
-{#                            <div class="form-group">#}
-{#                                <span class="form-label"><br></span>#}
-{#                                    <button class="btn btn-success add-form-row">+</button>#}
-{#                                    <a class="${options.deleteCssClass}" style="display: block; width: 55%; line-height: 190%;" href="javascript:void(0)"><i class="fa fa-minus"></i></a>#}
-{#                                </div>#}
-{#                        </div>#}
-
-                    </div>
-                    {% endfor %}
-                    <br>
-                    <br>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-block btn-primary">Rezerwacja <i class="fas fa-sign-in-alt"></i></button>
-                    </div>
-                </form>
-
-            </div>
+                </div>
+                {% endfor %}
+                <div class="col-4 offset-2 form-group">
+                    <button disabled type="submit" class="btn btn-block btn-primary">Zapłać i zarezerwuj | Kwota: 0 PLN</button>
+                </div>
+            </form>
         </div>
+    </div>
 {% endblock %}
 
-{#            <script src="{% static 'reservation/jquery.formset.js'%}"></script>#}
-{#           <script>#}
-{#                $('.formset_row-{{ kayaks.prefix }}').formset({#}
-{#                    addText: 'Dodaj kolejny',#}
-{#                    addCssClass: 'btn btn-success',#}
-{#                    deleteCssClass: 'btn btn-danger',#}
-{#                    prefix: '{{ kayaks.prefix }}',#}
-{#                });#}
-{#            </script>#}
+{% block body_scripts_additional %}
+{#<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
+<script type="text/javascript">
+function updateElementIndex(el, prefix, ndx) {
+    var id_regex = new RegExp('(' + prefix + '-\\d+)');
+    var replacement = prefix + '-' + ndx;
+    if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+    if (el.id) el.id = el.id.replace(id_regex, replacement);
+    if (el.name) el.name = el.name.replace(id_regex, replacement);
+}
+function cloneMore(selector, prefix, button) {
+    var newElement = $(selector).clone(true);
+    var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+    newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
+        if (this.nodeName == 'INPUT' || this.nodeName == 'BUTTON') {
+            this.setAttribute('disabled', 'disabled')
+        }
+        var name = $(this).attr('name');
+        if(name) {
+            name = name.replace('-' + (total-1) + '-', '-' + total + '-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+        }
+    });
+    newElement.find('label').each(function() {
+        var forValue = $(this).attr('for');
+        if (forValue) {
+          forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+          $(this).attr({'for': forValue});
+        }
+    });
+    total++;
+    $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+    $(selector).after(newElement);
+    var conditionRow = $('.form-row:not(:last)');
+    conditionRow.find('.btn.add-form-row')
+    .removeClass('btn-success').addClass('btn-danger')
+    .removeClass('add-form-row').addClass('remove-form-row')
+    .html('-');
+    {#document.querySelector('.btn-primary').setAttribute('disabled', 'disabled');#}
+    return false;
+}
+function deleteForm(prefix, btn) {
+    var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+    if (total > 1){
+        btn.closest('.form-row').remove();
+        var forms = $('.form-row');
+        $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+        for (var i=0, formCount=forms.length; i<formCount; i++) {
+            $(forms.get(i)).find(':input').each(function() {
+                updateElementIndex(this, prefix, i);
+            });
+        }
+    }
+    return false;
+}
+function rangeList(start, end) {
+    return Array(end - start + 1).fill().map((_, idx) => start + idx)
+}
+function setDisabledOption(button) {
+    const selectElement = $(button).closest('.form-row').find('select')[0];
+    const nextFormRow = $(button).closest('.form-row')[0].nextElementSibling;
+    const nextSelectElement = $(nextFormRow).find('select')[0];
+    nextSelectElement.options[selectElement.selectedIndex].setAttribute('disabled', 'disabled');
+    $(selectElement).css('pointer-events','none');
+    const selectArrow = selectElement.nextElementSibling;
+    selectArrow.remove();
+}
+function deleteDisabledOption(button) {
+    const rangeKayak = parseInt($(`#id_{{ kayaks.prefix }}-TOTAL_FORMS`).val());
+    const selectElement = $(button).closest('.form-row').find('select')[0];
+    rangeList(0, rangeKayak-1).forEach(function (id) {
+        const selectKayak = document.querySelector(`#id_details-${id}-kayak`);
+        selectKayak.options[selectElement.selectedIndex].removeAttribute('disabled');
+    })
+}
+function totalCostKayak(button) {
+    const selectKayak = $(button).closest('.form-row').find('select')[0];
+    const quantityKayak = parseInt($(button).closest('.form-row').find('input').val());
+    const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
+    const submitReservation = document.querySelector('.btn-primary');
+    let totalCost = parseInt(submitReservation.innerText.replace(/^\D+|\D+$/g, ""));
+    if ($(button).hasClass('add-form-row')) {
+        totalCost += priceKayak * quantityKayak;
+    }
+    else if ($(button).hasClass('remove-form-row')) {
+        totalCost -= priceKayak * quantityKayak;
+    }
+    submitReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
+}
 
-    {% block body_scripts_additional %}
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-{#        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>#}
-        <script>
+$(document).on('click', '.add-form-row', function(e){
+    e.preventDefault();
+    totalCostKayak(this);
+    cloneMore('.form-row:last', '{{ kayaks.prefix }}', this);
+    setDisabledOption(this);
+    return false;
+});
+$(document).on('click', '.remove-form-row', function(e){
+    e.preventDefault();
+    totalCostKayak(this);
+    deleteDisabledOption(this);
+    deleteForm('{{ kayaks.prefix }}', $(this));
+    return false;
+});
+
+</script>
+          <script>
             $(document).ready(function() {
 
                 $('#id_time').pickatime({
@@ -140,64 +234,32 @@
             });
 
         </script>
-        <script type='text/javascript'>
-            function updateElementIndex(el, prefix, ndx) {
-                var id_regex = new RegExp('(' + prefix + '-\\d+)');
-                var replacement = prefix + '-' + ndx;
-                if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
-                if (el.id) el.id = el.id.replace(id_regex, replacement);
-                if (el.name) el.name = el.name.replace(id_regex, replacement);
-            }
-            function cloneMore(selector, prefix) {
-                var newElement = $(selector).clone(true);
-                var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
-                newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
-                    var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
-                    var id = 'id_' + name;
-                    $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
-                });
-                newElement.find('label').each(function() {
-                    var forValue = $(this).attr('for');
-                    if (forValue) {
-                      forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
-                      $(this).attr({'for': forValue});
-                    }
-                });
-                total++;
-                $('#id_' + prefix + '-TOTAL_FORMS').val(total);
-                $(selector).after(newElement);
-                var conditionRow = $('.form-row:not(:last)');
-                conditionRow.find('.btn.add-form-row')
-                .removeClass('btn-success').addClass('btn-danger')
-                .removeClass('add-form-row').addClass('remove-form-row')
-                .html('<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>');
-                return false;
-            }
-            function deleteForm(prefix, btn) {
-                var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
-                if (total > 1){
-                    btn.closest('.form-row').remove();
-                    var forms = $('.form-row');
-                    $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
-                    for (var i=0, formCount=forms.length; i<formCount; i++) {
-                        $(forms.get(i)).find(':input').each(function() {
-                            updateElementIndex(this, prefix, i);
-                        });
-                    }
+    <script>
+        function changeFunc(selectOption) {
+            const selectKayak = selectOption.options[selectOption.selectedIndex];
+            const idQuantity = String(selectOption.id);
+            const inputQuantity = document.querySelector(`#id_details-${idQuantity.match(/\d+/)[0]}-quantity`);
+            const maxQuantity = selectKayak.text.match(/\d+/)[0];
+            inputQuantity.setAttribute('max', maxQuantity);
+            inputQuantity.removeAttribute('disabled');
+        }
+        function checkQuantity(inputQuantity) {
+            const buttonAdd = $(inputQuantity).closest('.form-row').find('button')[0];
+            const buttonReservation = document.querySelector('.btn-primary');
+            if (inputQuantity.value > 0) {
+                const maxValue = parseInt(inputQuantity.getAttribute('max'));
+                if (inputQuantity.value  > maxValue) {
+                    inputQuantity.value = maxValue;
                 }
-                return false;
+                buttonAdd.removeAttribute('disabled');
+                buttonReservation.removeAttribute('disabled')
             }
-            $(document).on('click', '.add-form-row', function(e){
-                e.preventDefault();
-                cloneMore('.form-row:last', 'form');
-                return false;
-            });
-            $(document).on('click', '.remove-form-row', function(e){
-                e.preventDefault();
-                deleteForm('form', $(this));
-                return false;
-            });
-        </script>
-    {% endblock %}
-
-
+            else {
+                buttonReservation.setAttribute('disabled', 'disabled');
+                if ($(buttonAdd).hasClass('add-form-row')) {
+                    buttonAdd.setAttribute('disabled', 'disabled')
+                }
+            }
+        }
+    </script>
+{% endblock %}

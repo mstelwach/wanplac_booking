@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'django_tables2',
     'bootstrap_pagination',
-    'mathfilters'
+    'mathfilters',
+    'getpaid'
 ]
 
 MIDDLEWARE = [
@@ -145,4 +146,23 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 # BROKER_URL = 'django://'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+
+GETPAID_BACKENDS = ['getpaid.backends.payu_rest']
+GETPAID_ORDER_MODEL = 'reservation.Reservation'
+INSTALLED_APPS += GETPAID_BACKENDS
+GETPAID_ORDER_DESCRIPTION = "Reservation {{ reservation.id }}"
+GETPAID_SUCCESS_URL_NAME = 'reservation:payu-success'
+GETPAID_FAILURE_URL_NAME = 'reservation:payu-canceled'
+
+GETPAID_BACKENDS_SETTINGS = {
+    'getpaid.backends.payu_rest': {
+        'client_id': '378681',
+        'pos_id': '378681',
+        'client_secret': 'a0fe0de9e54f106978843f93dcbec565',
+        'key2': 'e41e35a10ce910bb54aa3858cece8748',
+        'signing': True,
+        'testing': True,
+    },
+}
+
 

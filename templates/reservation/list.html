@@ -39,8 +39,8 @@
               <div class="list-group-item list-group-item-action flex-column align-items hide">
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Sprzęt:</h5>
-                    {% for item in reservation.kayaks.all %}
-                        <p class="mb-1">Typ: {{ item.kayak.name }} | Ilośc: {{ item.quantity }}</p>
+                    {% for detail in reservation.details.all %}
+                        <p class="mb-1">Typ: {{ detail.kayak.name }} | Ilość: {{ detail.quantity }}</p>
                         {% endfor %}
                   </div>
               </div>

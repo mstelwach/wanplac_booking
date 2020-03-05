@@ -1,7 +1,7 @@
 <div class="header clearfix">
     <nav>
           <ul class="nav nav-pills pull-right">
-            <li role="presentation" class="active"><a href="#">Strona Główna</a></li>
+            <li role="presentation"><a href="{% url 'home-page' %}">Strona Główna</a></li>
 {#            <li role="presentation"><a href="#">Pytania i odpowiedzi</a></li>#}
               {% if user.is_authenticated %}
                   <li role="presentation"><a href="{% url 'reservation:list' %}">Moje rezerwacje</a></li>
@@ -13,4 +13,6 @@
           </ul>
     </nav>
     <h3 class="text-muted">WanPlac</h3>
+
+
 </div>
