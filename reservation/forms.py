@@ -1,8 +1,5 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory, TextInput, Select, BaseInlineFormSet
-from django.utils.html import format_html
-
 from reservation.models import Reservation, ReservationDetail, Kayak, PAYMENT_METHOD
 
 
@@ -41,13 +38,13 @@ class ReservationCreateUpdateForm(forms.ModelForm):
             'last_name': TextInput(attrs={'placeholder': 'Nazwisko potrzebne do rezerwacji'}),
             'date': TextInput(attrs={'placeholder': 'Data rezerwacji'}),
             'time': TextInput(attrs={'placeholder': 'Godzina rezerwacji'}),
+            # 'phone': TextInput(attrs={'placeholder': 'Telefon kontaktowy'})
         }
 
     def __init__(self, *args, **kwargs):
         super(ReservationCreateUpdateForm, self).__init__(*args, **kwargs)
         self.fields['route'].empty_label = 'Wybierz szlak'
-
-# PRODUCT_QUANTITY_CHOICES = [(i, str(i)) for i in range(1, 100)]
+        self.fields['payment'] = forms.ChoiceField(choices=PAYMENT_METHOD, widget=forms.RadioSelect(attrs={'id': 'value'}))
 
 
 class ReservationDetailForm(forms.ModelForm):
@@ -62,17 +59,6 @@ class ReservationDetailForm(forms.ModelForm):
                                                    choices=[('', 'Wybierz kajak')] + [(str(kayak.pk), kayak) for kayak in Kayak.objects.all()],
                                                    )
         self.fields['kayak'].widget.disabled_choices = [''] + [str(kayak.id) for kayak in Kayak.objects.filter(available=False)]
-
-
-# class KayakFormset(BaseInlineFormSet):
-#     def clean(self):
-#         if any(self.errors):
-#             return
-#
-#         for form in self.forms:
-#             kayak = self.cleaned_data['kayak']
-#             if not kayak:
-#                 raise forms.ValidationError('Kayak must be required')
 
 
 ReservationKayakFormSet = inlineformset_factory(

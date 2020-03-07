@@ -9,6 +9,7 @@
         <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
 	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/bootstrap.min.css' %}" />
 	    <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/style.css' %}" />
+        <link type="text/css" rel="stylesheet" href="{% static 'css/reservation/alternative/intlTelInput.css' %}"/>
 
     {% endblock %}
 
@@ -42,19 +43,42 @@
                         </div>
                     </div>
                 </div>
-                 <div class="form-group">
-                    <span class="form-label">Telefon</span>
-                    {% render_field form.phone class+='form-control' %}
-                    <span class="select-arrow"></span>
-                </div>
-                <div class="form-group">
+                <div class="row no-margin">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <span class="form-label">Telefon</span>
+                            <br>
+                            {% render_field form.phone class+='form-control' %}
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                          <div class="form-group">
                     <span class="form-label">Trasa wyprawy</span>
                     {% render_field form.route class+='form-control' %}
                     <span class="select-arrow"></span>
                 </div>
+                    </div>
+                </div>
                 <div class="form-group">
-                    <span class="form-label">Forma płatności</span>
-                    {% render_field form.payment class+='form-control' %}
+						<div class="headingWrap">
+								<h3 class="headingTop text-center">Wybierz metodę płatności</h3>
+						</div>
+						<div class="paymentWrap">
+							<div class="btn-group paymentBtnGroup btn-group-justified" data-toggle="buttons">
+					            <label class="btn paymentMethod active">
+					            	<div class="method payu"></div>
+                                    {% render_field form.payment.0 %}
+					            </label>
+					            <label class="btn paymentMethod">
+					            	<div class="method paypal"></div>
+                                    {% render_field form.payment.1 %}
+					            </label>
+					            <label class="btn paymentMethod">
+				            		<div class="method cash"></div>
+                                    {% render_field form.payment.2 %}
+					            </label>
+					        </div>
+						</div>
                 </div>
                 {{ kayaks.management_form }}
                 {% for form in kayaks %}
@@ -127,7 +151,7 @@ function cloneMore(selector, prefix, button) {
     .removeClass('btn-success').addClass('btn-danger')
     .removeClass('add-form-row').addClass('remove-form-row')
     .html('-');
-    {#document.querySelector('.btn-primary').setAttribute('disabled', 'disabled');#}
+    {#document.querySelector('.btn-primary').removeAttribute('disabled');#}
     return false;
 }
 function deleteForm(prefix, btn) {
@@ -209,16 +233,16 @@ $(document).on('click', '.remove-form-row', function(e){
                     // Formats
                     format: 'H:i',
                     formatSubmit: 'H:i',
-                    {#formatLabel: '<b>H</b>:i',#}
-                    formatLabel: function(time) {
-                        var hours = ( time.pick - this.get('now').pick ) / 60,
-                          label = hours < 0 ? ' !hours to now' : hours > 0 ? ' !hours from now' : 'now'
-                        return  'H:i <sm!all>' + ( hours ? Math.abs(hours) : '' ) + label +'</sm!all>'
-                        }
+                    formatLabel: '<b>H</b>:i',
+                    {#formatLabel: function(time) {#}
+                    {#    var hours = ( time.pick - this.get('now').pick ) / 60,#}
+                    {#      label = hours < 0 ? ' !hours to now' : hours > 0 ? ' !hours from now' : 'now';#}
+                    {#    return  'H:i <sm!all>' + ( hours ? Math.abs(hours) : '' ) + label +'</sm!all>'#}
+                    {#    }#}
                   });
                 $('#id_date').pickadate({
                     // Date limits
-                    min: -1,
+                    min: 0,
                     max: 6,
                     // Formats
                     format: 'yyyy-mm-dd',
@@ -230,13 +254,33 @@ $(document).on('click', '.remove-form-row', function(e){
                     // Editable input
                     editable: false,
                 });
-
+                document.querySelectorAll('.paymentWrap input[type=radio]').forEach(function (el) {
+                    el.nextSibling.textContent = ''
+                });
+                let input = document.querySelector("#id_phone");
+                window.intlTelInput(input, {
+                    onlyCountries: ["al", "ad", "at", "by", "be", "ba", "bg", "hr", "cz", "dk",
+                      "ee", "fo", "fi", "fr", "de", "gi", "gr", "va", "hu", "is", "ie", "it", "lv",
+                      "li", "lt", "lu", "mk", "mt", "md", "mc", "me", "nl", "no", "pl", "pt", "ro",
+                      "ru", "sm", "rs", "sk", "si", "es", "se", "ch", "ua", "gb", "us"],
+                    preferredCountries: ['pl', 'gb', 'de'],
+                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.6/js/utils.js",
+                    customContainer: ''
+                })
             });
-
+            $(document).ready(function(event) {
+                $('#id_route').on('mouseenter','option',function(e) {
+                    console.log(this.value, 'Yeah')
+                });
+            });
         </script>
     <script>
         function changeFunc(selectOption) {
+            const buttonReservation = document.querySelector('.btn-primary');
             const selectKayak = selectOption.options[selectOption.selectedIndex];
+            if (selectKayak) {
+                buttonReservation.setAttribute('disabled', 'disabled');
+            }
             const idQuantity = String(selectOption.id);
             const inputQuantity = document.querySelector(`#id_details-${idQuantity.match(/\d+/)[0]}-quantity`);
             const maxQuantity = selectKayak.text.match(/\d+/)[0];
@@ -260,6 +304,7 @@ $(document).on('click', '.remove-form-row', function(e){
                     buttonAdd.setAttribute('disabled', 'disabled')
                 }
             }
+
         }
     </script>
 {% endblock %}

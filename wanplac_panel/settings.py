@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django_tables2',
     'bootstrap_pagination',
     'mathfilters',
-    'getpaid'
+    'getpaid',
+    'phonenumber_field'
 ]
 
 MIDDLEWARE = [

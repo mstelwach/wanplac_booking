@@ -1,6 +1,7 @@
 import getpaid
 from django.contrib.auth.models import User
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Kayak(models.Model):
@@ -33,9 +34,9 @@ class Route(models.Model):
 
 
 PAYMENT_METHOD = [
-    ('cash', 'Cash Payment'),
-    # ('paypal', 'PayPal'),
     ('payu', 'PayU'),
+    ('paypal', 'PayPal'),
+    ('cash', 'Cash Payment'),
 ]
 
 STATUS_BOOKING = [
@@ -52,10 +53,10 @@ class Reservation(models.Model):
     time = models.TimeField()
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     route = models.ForeignKey(Route, on_delete=models.CASCADE)
-    status = models.CharField(max_length=32, choices=STATUS_BOOKING, default=[0][0])
+    status = models.CharField(max_length=32, choices=STATUS_BOOKING, default='unconfirmed')
     payment = models.CharField(max_length=64, choices=PAYMENT_METHOD)
     paid = models.BooleanField(default=False)
-    phone = models.CharField(max_length=32, blank=True)
+    phone = PhoneNumberField()
     currency = models.CharField(max_length=16, default='PLN')
     created = models.DateTimeField(auto_now_add=True)
 
