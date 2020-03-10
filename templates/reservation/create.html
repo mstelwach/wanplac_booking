@@ -18,28 +18,32 @@
 {% block content %}
     <div class="row spacer">
         <div class="booking-form">
-            <form  role=form method="post">
+            <form  role=form method="post" data-toggle="validator" id="myForm">
             {% csrf_token %}
 
                 <div class="form-group">
-                    <span class="form-label">Imię klienta</span>
+                    <span class="form-label control-label">Imię klienta</span>
                     {% render_field form.first_name class+='form-control' %}
                 </div>
-                <div class="form-group">
-                    <span class="form-label">Nazwisko klienta</span>
+                <div class="form-group has-feedback">
+                    <span class="form-label control-label">Nazwisko klienta</span>
                     {% render_field form.last_name class+='form-control' %}
+                                                    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                <div class="help-block with-errors">Hey look, this one has feedback icons!</div>
                 </div>
                 <div class="row no-margin">
                     <div class="col-sm-6">
-                        <div class="form-group">
-                            <span class="form-label">Data</span>
-                            {% render_field form.date class+='form-control' %}
+                        <div class="form-group has-feedback">
+                            <span class="form-label control-label">Data</span>
+                                {% render_field form.date class+='form-control' required='required'%}
+                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                <div class="help-block with-errors">Hey look, this one has feedback icons!</div>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
                             <span class="form-label">Godzina</span>
-                            {% render_field form.time class+='form-control' %}
+                            {% render_field form.time class+='form-control' reguired='reguired'%}
                         </div>
                     </div>
                 </div>
@@ -80,32 +84,46 @@
 					        </div>
 						</div>
                 </div>
-                {{ kayaks.management_form }}
-                {% for form in kayaks %}
-                <div class="row form-row spacer no-margin">
-                      <div class="col-sm-7">
-                            <div class="form-group">
-                                <span class="form-label">Kajak</span>
-                                {% render_field form.kayak class+='form-control' onchange="changeFunc(this);"%}
-                                <span class="select-arrow"></span>
-                            </div>
-                      </div>
-                        <div class="col-sm-2">
-                            <div class="form-group">
-                                <span class="form-label">Ilość</span>
-                                {% render_field form.quantity disabled='disabled' class+='form-control' onchange="checkQuantity(this);" %}
-                            </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <div class="form-group">
-                                <span class="form-label"><br></span>
-                                <button disabled class="btn btn-success add-form-row" style="display: block; width: 50%; height: 40px; padding: 6px 12px; border: 4px; line-height: 1.42857143">+</button>
-                            </div>
-                        </div>
-                </div>
-                {% endfor %}
+{#                {% if form.errors %}#}
+{#    {% for field in form %}#}
+{#        {% for error in field.errors %}#}
+{#            <div class="alert alert-danger">#}
+{#                <strong>{{ error|escape }}</strong>#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{#    {% for error in form.non_field_errors %}#}
+{#        <div class="alert alert-danger">#}
+{#            <strong>{{ error|escape }}</strong>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#{% endif %}#}
+{#                {{ kayaks.management_form }}#}
+{#                {% for form in kayaks %}#}
+{#                <div class="row form-row spacer no-margin">#}
+{#                      <div class="col-sm-7">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label">Kajak</span>#}
+{#                                {% render_field form.kayak class+='form-control' onchange="changeFunc(this);"%}#}
+{#                                <span class="select-arrow"></span>#}
+{#                            </div>#}
+{#                      </div>#}
+{#                        <div class="col-sm-2">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label">Ilość</span>#}
+{#                                {% render_field form.quantity disabled='disabled' class+='form-control' onchange="checkQuantity(this);" %}#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-sm-2">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label"><br></span>#}
+{#                                <button disabled class="btn btn-success add-form-row" style="display: block; width: 50%; height: 40px; padding: 6px 12px; border: 4px; line-height: 1.42857143">+</button>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                </div>#}
+{#                {% endfor %}#}
                 <div class="col-4 offset-2 form-group">
-                    <button disabled type="submit" class="btn btn-block btn-primary">Zapłać i zarezerwuj | Kwota: 0 PLN</button>
+                    <button type="submit" class="btn btn-block btn-primary">Zapłać i zarezerwuj | Kwota: 0 PLN</button>
                 </div>
             </form>
         </div>
@@ -221,6 +239,7 @@ $(document).on('click', '.remove-form-row', function(e){
 </script>
           <script>
             $(document).ready(function() {
+                $('#myForm').validator();
 
                 $('#id_time').pickatime({
                     // Time limits
