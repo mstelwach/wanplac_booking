@@ -70,25 +70,6 @@ class Reservation(models.Model):
         return sum(detail.get_cost() for detail in self.details.all())
 
 
-# class Order(models.Model):
-#     PAYMENT_METHOD = [
-#         ('paypal', 'PayPal'),
-#         ('payu', 'PayU'),
-#     ]
-#
-#     STATUS_CHOICE = [
-#         ('W', 'Waiting for payment'),
-#         ('P', 'Payment complete')
-#     ]
-#
-#     reservation = models.OneToOneField(Reservation, on_delete=models.CASCADE)
-#     payment = models.CharField(max_length=64, choices=PAYMENT_METHOD, default=[1][0])
-#     paid = models.BooleanField(default=False)
-#     currency = models.CharField(max_length=16, default='PLN')
-#     status = models.CharField(max_length=32, choices=STATUS_CHOICE, default=[0][0])
-#     total = models.DecimalField(decimal_places=2, max_digits=8)
-
-
 class ReservationDetail(models.Model):
     reservation = models.ForeignKey(Reservation, related_name='details', on_delete=models.CASCADE)
     kayak = models.ForeignKey(Kayak, related_name='reservation_kayaks', on_delete=models.CASCADE)

@@ -77,3 +77,22 @@ body {
     border-bottom: 0;
   }
 }
+
+.dots {
+  margin: 40px auto
+}
+
+.dot {
+    display: inline-block;
+    border-radius: 50%;
+    width: 50%;
+    background-color: #EEE;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;}
+    .dot.dot-success {
+        background-color: #449D44;
+    }
+    .do.dot-warning {
+        background-color: #D9534F;
+    }

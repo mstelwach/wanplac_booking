@@ -38,7 +38,6 @@ class ReservationCreateUpdateForm(forms.ModelForm):
             'last_name': TextInput(attrs={'placeholder': 'Nazwisko potrzebne do rezerwacji'}),
             'date': TextInput(attrs={'placeholder': 'Data rezerwacji'}),
             'time': TextInput(attrs={'placeholder': 'Godzina rezerwacji'}),
-            # 'phone': TextInput(attrs={'placeholder': 'Telefon kontaktowy'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -64,6 +63,6 @@ class ReservationDetailForm(forms.ModelForm):
 ReservationKayakFormSet = inlineformset_factory(
     Reservation, ReservationDetail, form=ReservationDetailForm,
     extra=0, can_delete=True, error_messages='This field is required',
-    min_num=1, validate_min=True, formset=BaseInlineFormSet
+    min_num=1, validate_min=True
 )
 

@@ -71,15 +71,15 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             if not form.cleaned_data['last_name']:
                 form.instance.last_name = self.request.user.last_name
             form.instance.user = self.request.user
-            reservation = form.save()
-            if kayaks.is_valid():
-                kayaks.instance = reservation
-                kayaks.save()
-                for detail in kayaks.instance.details.all():
-                    detail.kayak.stock -= detail.quantity
-                    if not detail.kayak.stock:
-                        detail.kayak.available = False
-                    detail.kayak.save()
+        reservation = form.save()
+        if kayaks.is_valid():
+            kayaks.instance = reservation
+            kayaks.save()
+            for detail in kayaks.instance.details.all():
+                detail.kayak.stock -= detail.quantity
+                if not detail.kayak.stock:
+                    detail.kayak.available = False
+                detail.kayak.save()
         return super(ReservationCreateView, self).form_valid(form)
 
 

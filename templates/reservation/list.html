@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
 {% load bootstrap4 %}
 {% load widget_tweaks %}
-{% load static %}
 {% load mathfilters %}
 
 <head>
 {% block title %} Moje rezerwacje {% endblock %}
-    {% block head_scripts_additional %}
-        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-        <link rel="stylesheet" href="{% static 'css/reservation/list.css' %}">
-    {% endblock %}
 </head>
 
 {% block content %}
@@ -48,35 +43,4 @@
     {% endfor %}
     </div>
 
-
-{#    {% block body_scripts_additional %}#}
-        <script>
-            $(document).ready(function() {
-                $('.booking-container').on('click', function (e) {
-                  e.preventDefault();
-                  const bookingHeader = this;
-                  const elementTab = this.querySelector('.tab-text');
-
-                  {#console.log(elementTab.firstElementChild);#}
-                  if (bookingHeader.classList.contains('active')) {
-                      bookingHeader.classList.remove('active');
-                      elementTab.firstElementChild.innerHTML = 'Rozwiń'
-                  }
-                  else {
-                      bookingHeader.classList.add('active');
-                      elementTab.firstElementChild.innerHTML = 'Schowaj'
-                  }
-
-                  const bookingDetail = this.nextElementSibling;
-                    if (bookingDetail.classList.contains('hide')) {
-                        bookingDetail.classList.remove('hide')
-                    }
-                    else {
-                        bookingDetail.classList.add('hide')
-                    }
-                });
-            });
-        </script>
-{#    {% endblock %}#}
 {% endblock %}
-
