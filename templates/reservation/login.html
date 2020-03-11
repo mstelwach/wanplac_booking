@@ -8,15 +8,6 @@
 	<title>Login V19</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-{#	<link rel="icon" type="image/png" href="images/icons/favicon.ico"/>#}
-	<link rel="stylesheet" type="text/css" href="{% static 'vendor/login/bootstrap/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'fonts/Linearicons-Free-v1.0.0/icon-font.min.css' %}"/>
-	<link rel="stylesheet" type="text/css" href="{% static 'vendor/login/animate/animate.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static 'vendor/login/css-hamburgers/hamburgers.min.css' %}">
-	<link rel="stylesheet" type="text/css" href="{% static 'vendor/login/animsition/css/animsition.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'vendor/login/select2/select2.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'vendor/login/daterangepicker/daterangepicker.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/login/util.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/login/login.css' %}">
 </head>
@@ -25,20 +16,20 @@
 	<div class="limiter">
 		<div class="container-login100">
 			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-50">
-				<form class="login100-form validate-form" method="post">
+				<form role="form" class="login100-form validate-form" method="post">
                     {% csrf_token %}
 					<span class="login100-form-title p-b-33">
 						Logowanie
 					</span>
 
 					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
-                        {% render_field form.username class+='input100' placeholder='Nazwa użytkownika' name='username' %}
+                        {% render_field form.username class+='input100'%}
 						<span class="focus-input100-1"></span>
 						<span class="focus-input100-2"></span>
 					</div>
 
 					<div class="wrap-input100 rs1 validate-input" data-validate="Password is required">
-                        {% render_field form.password class+='input100' placeholder='Hasło' name='password' %}
+                        {% render_field form.password class+='input100'%}
 						<span class="focus-input100-1"></span>
 						<span class="focus-input100-2"></span>
 					</div>
@@ -73,15 +64,7 @@
 	</div>
 
 
-
-	<script src="{% static 'vendor/login/jquery/jquery-3.2.1.min.js' %}"></script>
-	<script src="{% static 'vendor/login/animsition/js/animsition.min.js' %}"></script>
-	<script src="{% static 'vendor/login/bootstrap/js/popper.js' %}"></script>
-	<script src="{% static 'vendor/login/bootstrap/js/bootstrap.min.js' %}"></script>
-	<script src="{% static 'vendor/login/select2/select2.min.js' %}"></script>
-    <script src="{% static 'vendor/login/daterangepicker/moment.min.js' %}"></script>
-    <script src="{% static 'vendor/login/daterangepicker/daterangepicker.js' %}"></script>
-    <script src="{% static 'vendor/login/countdowntime/countdowntime.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 	<script src="{% static 'js/login/main.js' %}"></script>
 
 </body>

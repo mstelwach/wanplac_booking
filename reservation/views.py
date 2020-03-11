@@ -19,11 +19,11 @@ def home_page(request):
 
 
 class Login(LoginView):
-    template_name = 'reservation/login.html'
+    template_name = 'reservation/login2.html'
     form_class = AuthenticationForm
 
     def form_valid(self, form):
-        check_quantity_kayak.delay('dssd')
+        # check_quantity_kayak.delay('dssd')
         return super(Login, self).form_valid(form)
 
 
