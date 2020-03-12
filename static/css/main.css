@@ -93,6 +93,9 @@ body {
     .dot.dot-success {
         background-color: #449D44;
     }
-    .do.dot-warning {
+    .dot.dot-warning {
         background-color: #D9534F;
+    }
+    .dot.dot-dark {
+        background-color: #343a40;
     }

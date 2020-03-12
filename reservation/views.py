@@ -19,7 +19,7 @@ def home_page(request):
 
 
 class Login(LoginView):
-    template_name = 'reservation/login2.html'
+    template_name = 'reservation/login.html'
     form_class = AuthenticationForm
 
     def form_valid(self, form):

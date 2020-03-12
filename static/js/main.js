@@ -21,4 +21,8 @@
             bookingDetail.classList.add('hide')
         }
     });
+    $('.nav-pills li a').filter(function(){return this.href==location.href}).parent().addClass('active').siblings().removeClass('active');
+    $('.nav-pills li a').click(function(){
+			$(this).parent().addClass('active').siblings().removeClass('active')
+    })
 })(jQuery);
