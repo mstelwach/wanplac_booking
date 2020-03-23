@@ -1,4 +1,3 @@
-import getpaid
 from django.contrib.auth.models import User
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
@@ -79,4 +78,4 @@ class ReservationDetail(models.Model):
         return self.kayak.price * self.quantity
 
 
-getpaid.register_to_payment(Reservation, unique=False, related_name='payments')
+# getpaid.register_to_payment(Reservation, unique=False, related_name='payments')

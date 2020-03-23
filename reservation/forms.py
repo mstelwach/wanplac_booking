@@ -43,7 +43,8 @@ class ReservationCreateUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ReservationCreateUpdateForm, self).__init__(*args, **kwargs)
         self.fields['route'].empty_label = 'Wybierz szlak'
-        self.fields['payment'] = forms.ChoiceField(choices=PAYMENT_METHOD, widget=forms.RadioSelect(attrs={'id': 'value'}))
+        self.fields['payment'] = forms.ChoiceField(choices=PAYMENT_METHOD,
+                                                   widget=forms.RadioSelect(attrs={'id': 'value'}))
 
 
 class ReservationDetailForm(forms.ModelForm):
@@ -54,15 +55,15 @@ class ReservationDetailForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReservationDetailForm, self).__init__(*args, **kwargs)
+        qs_kayaks_all = [(str(kayak.pk), kayak) for kayak in Kayak.objects.all()]
         self.fields['kayak'].widget = SelectWidget(attrs={},
-                                                   choices=[('', 'Wybierz kajak')] + [(str(kayak.pk), kayak) for kayak in Kayak.objects.all()],
+                                                   choices=[('', 'Wybierz kajak')] + qs_kayaks_all,
                                                    )
-        self.fields['kayak'].widget.disabled_choices = [''] + [str(kayak.id) for kayak in Kayak.objects.filter(available=False)]
+        qs_kayaks_not_available = [str(kayak.id) for kayak in Kayak.objects.filter(available=False)]
+        self.fields['kayak'].widget.disabled_choices = [''] + qs_kayaks_not_available
 
 
 ReservationKayakFormSet = inlineformset_factory(
-    Reservation, ReservationDetail, form=ReservationDetailForm,
-    extra=0, can_delete=True, error_messages='This field is required',
-    min_num=1, validate_min=True
+    Reservation, ReservationDetail, form=ReservationDetailForm, extra=1, can_delete=True
 )
 

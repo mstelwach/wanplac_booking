@@ -24,6 +24,6 @@ from reservation.views import home_page
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', home_page, name='home-page'),
-    url(r'', include('getpaid.urls', namespace='getpaid')),
+    # url(r'', include('getpaid.urls', namespace='getpaid')),
     url(r'^reservation/', include('reservation.urls', namespace='reservation')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

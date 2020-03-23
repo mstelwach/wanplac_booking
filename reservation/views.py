@@ -1,13 +1,11 @@
-from _decimal import Decimal
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db import transaction
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
-from getpaid.forms import PaymentMethodForm
-
 from reservation.forms import ReservationCreateUpdateForm, ReservationKayakFormSet
 from reservation.models import Reservation, Kayak
 from reservation.tasks import check_quantity_kayak
@@ -57,10 +55,20 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super(ReservationCreateView, self).get_context_data(**kwargs)
         if self.request.POST:
-            context['kayaks'] = ReservationKayakFormSet(self.request.POST, instance=self.object)
+            context['kayaks'] = ReservationKayakFormSet(self.request.POST)
         else:
-            context['kayaks'] = ReservationKayakFormSet(instance=self.object)
+            context['kayaks'] = ReservationKayakFormSet()
         return context
+
+    def post(self, request, *args, **kwargs):
+        exclude_date = []
+        if request.is_ajax():
+            select_date = request.POST.get('selectDate')
+            reservations = Reservation.objects.filter(date=select_date)
+            for reservation in reservations:
+                exclude_date.append((reservation.time.hour, reservation.time.minute))
+            return JsonResponse({'exclude_time': exclude_date})
+        return super(ReservationCreateView, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
         context = self.get_context_data()
@@ -71,23 +79,23 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             if not form.cleaned_data['last_name']:
                 form.instance.last_name = self.request.user.last_name
             form.instance.user = self.request.user
-        reservation = form.save()
-        if kayaks.is_valid():
-            kayaks.instance = reservation
-            kayaks.save()
-            for detail in kayaks.instance.details.all():
-                detail.kayak.stock -= detail.quantity
-                if not detail.kayak.stock:
-                    detail.kayak.available = False
-                detail.kayak.save()
+            reservation = form.save()
+            if kayaks.is_valid():
+                kayaks.instance = reservation
+                kayaks.save()
+                for detail in kayaks.instance.details.all():
+                    detail.kayak.stock -= detail.quantity
+                    if not detail.kayak.stock:
+                        detail.kayak.available = False
+                    detail.kayak.save()
         return super(ReservationCreateView, self).form_valid(form)
 
 
-class ReservationPayUPaymentView(DetailView):
-    model = Reservation
-    template_name = 'reservation/payu_payment.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(ReservationPayUPaymentView, self).get_context_data(**kwargs)
-        context['payment_form'] = PaymentMethodForm(self.object.currency, initial={'order': self.object})
-        return context
+# class ReservationPayUPaymentView(DetailView):
+#     model = Reservation
+#     template_name = 'reservation/payu_payment.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(ReservationPayUPaymentView, self).get_context_data(**kwargs)
+#         context['payment_form'] = PaymentMethodForm(self.object.currency, initial={'order': self.object})
+#         return context
