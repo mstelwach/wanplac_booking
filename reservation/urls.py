@@ -10,4 +10,6 @@ urlpatterns = [
     url(r'^list/$', ReservationListView.as_view(), name='list'),
     url(r'^create/$', ReservationCreateView.as_view(), name='create'),
     # url(r'^(?P<pk>[\d]+)/payu/process/$', ReservationPayUPaymentView.as_view(), name='payu-process'),
+    url(r'^ajax/load_quantity/', load_quantity, name='ajax-load-quantity'),
+
 ]

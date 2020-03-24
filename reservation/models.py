@@ -72,7 +72,7 @@ class Reservation(models.Model):
 class ReservationDetail(models.Model):
     reservation = models.ForeignKey(Reservation, related_name='details', on_delete=models.CASCADE)
     kayak = models.ForeignKey(Kayak, related_name='reservation_kayaks', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.PositiveIntegerField()
 
     def get_cost(self):
         return self.kayak.price * self.quantity

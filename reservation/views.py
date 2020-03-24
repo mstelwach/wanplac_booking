@@ -5,7 +5,7 @@ from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, DetailView
+from django.views.generic import ListView, CreateView
 from reservation.forms import ReservationCreateUpdateForm, ReservationKayakFormSet
 from reservation.models import Reservation, Kayak
 from reservation.tasks import check_quantity_kayak
@@ -60,6 +60,7 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             context['kayaks'] = ReservationKayakFormSet()
         return context
 
+    # GET DYNAMIC DATE FIELD VALUE, RETURN EXCLUDE_TIME - FORMAT JSON
     def post(self, request, *args, **kwargs):
         exclude_date = []
         if request.is_ajax():
@@ -67,6 +68,7 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             reservations = Reservation.objects.filter(date=select_date)
             for reservation in reservations:
                 exclude_date.append((reservation.time.hour, reservation.time.minute))
+            print(exclude_date)
             return JsonResponse({'exclude_time': exclude_date})
         return super(ReservationCreateView, self).post(request, *args, **kwargs)
 
@@ -99,3 +101,9 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
 #         context = super(ReservationPayUPaymentView, self).get_context_data(**kwargs)
 #         context['payment_form'] = PaymentMethodForm(self.object.currency, initial={'order': self.object})
 #         return context
+
+def load_quantity(request):
+    kayak_pk = request.GET.get('selectKayakId')
+    kayak_stock = Kayak.objects.get(pk=kayak_pk).stock
+    quantity_range = [(number, number) for number in range(1, kayak_stock + 1)]
+    return render(request, 'reservation/quantity_dropdown_list_options.html', {'quantity_range': quantity_range})

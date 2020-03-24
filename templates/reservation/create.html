@@ -10,8 +10,10 @@
 	    <link type="text/css" rel="stylesheet" href="{% static 'css/create_form/style.css' %}" />
         <!--PickaTime CSS-->
         <link rel="stylesheet" href="{% static 'css/create_form/date_time_fields/style.css' %}">
-        <!--PickaTime CSS-->
+        <!--Intl-Tel-Input CSS-->
         <link type="text/css" rel="stylesheet" href="{% static 'css/create_form/phone_field/style.css' %}"/>
+        <script src="{% static 'js/create_form/main.js' %}"></script>
+
     {% endblock %}
 
 </head>
@@ -21,26 +23,25 @@
         <div class="booking-form">
             <form  role=form method="post">
             {% csrf_token %}
-
                 <div class="form-group">
-                    <span class="form-label control-label">Imię klienta</span>
+                    <span class="form-label control-label">Imię</span>
                     {% render_field form.first_name class+='form-control' %}
                 </div>
                 <div class="form-group has-feedback">
-                    <span class="form-label control-label">Nazwisko klienta</span>
+                    <span class="form-label control-label">Nazwisko</span>
                     {% render_field form.last_name class+='form-control' %}
                 </div>
                 <div class="row no-margin">
                     <div class="col-sm-6">
                         <div class="form-group has-feedback">
                             <span class="form-label control-label">Data</span>
-                            {% render_field form.date class+='form-control '%}
+                            {% render_field form.date class+='form-control' %}
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
                             <span class="form-label">Godzina</span>
-                            {% render_field form.time class+='form-control' %}
+                            {% render_field form.time class+='form-control'%}
                         </div>
                     </div>
                 </div>
@@ -49,7 +50,7 @@
                         <div class="form-group">
                             <span class="form-label">Telefon</span>
                             <br>
-                            {% render_field form.phone class+='form-control' %}
+                            {% render_field form.phone class+='form-control' onchange="validatePhone(this);" %}
                         </div>
                     </div>
                     <div class="col-sm-8">
@@ -66,7 +67,7 @@
 						</div>
 						<div class="paymentWrap">
 							<div class="btn-group paymentBtnGroup btn-group-justified" data-toggle="buttons">
-					            <label class="btn paymentMethod active">
+					            <label class="btn paymentMethod">
 					            	<div class="method payu"></div>
                                     {% render_field form.payment.0 %}
 					            </label>
@@ -87,14 +88,15 @@
                       <div class="col-sm-7">
                             <div class="form-group">
                                 <span class="form-label">Kajak</span>
-                                {% render_field form.kayak class+='form-control' onchange="changeFunc(this);"%}
+                                {% render_field form.kayak class+='form-control' onchange="validateKayak(this);"%}
                                 <span class="select-arrow"></span>
                             </div>
                       </div>
                         <div class="col-sm-2">
                             <div class="form-group">
                                 <span class="form-label">Ilość</span>
-                                {% render_field form.quantity disabled='disabled' class+='form-control' onchange="checkQuantity(this);" %}
+                                {% render_field form.quantity disabled='disabled' class+='form-control' onchange="validateQuantity(this);" %}
+                                <span class="select-arrow"></span>
                             </div>
                         </div>
                         <div class="col-sm-2">
@@ -106,7 +108,7 @@
                 </div>
                 {% endfor %}
                 <div class="col-4 offset-2 form-group">
-                    <button type="submit" class="btn btn-block btn-primary">Zapłać i zarezerwuj | Kwota: 0 PLN</button>
+                    <button type="submit" disabled class="btn btn-block btn-primary">Zapłać i zarezerwuj | Kwota: 0 PLN</button>
                 </div>
             </form>
         </div>
@@ -120,27 +122,27 @@
         <script src="{% static 'js/create_form/date_time_fields/picker.js' %}"></script>
         <script src="{% static 'js/create_form/date_time_fields/pl_PL.js' %}"></script>
 
-    <!--PhoneField JS-->
-        <script src="{% static 'js/create_form/phone_field/intlTelInput.js' %}"></script>
+    <!--Intl-Tel-Input JS-->
         <script src="{% static 'js/create_form/phone_field/intlTelInput-jquery.js' %}"></script>
 
         <script>
         $(document).on('click', '.add-form-row', function(e){
             e.preventDefault();
-            totalCostKayak(this);
+            {#totalCostKayak(this);#}
             cloneMore('.form-row:last', '{{ kayaks.prefix }}', this);
             setDisabledOption(this);
             return false;
         });
         $(document).on('click', '.remove-form-row', function(e){
             e.preventDefault();
-            totalCostKayak(this);
+            {#totalCostKayak(this);#}
             deleteDisabledOption(this, '{{ kayaks.prefix }}');
             deleteForm('{{ kayaks.prefix }}', $(this));
             return false;
         });
+
         $(document).ready(function() {
-                $('#id_time').pickatime({
+                let timeField = $('#id_time').pickatime({
                     // Time limits
                     min: [9,0],
                     max: [12,0],
@@ -152,39 +154,64 @@
                     format: 'H:i',
                     formatSubmit: 'H:i',
                     formatLabel: '<b>H</b>:i',
-                    {#formatLabel: function(time) {#}
-                    {#    var hours = ( time.pick - this.get('now').pick ) / 60,#}
-                    {#      label = hours < 0 ? ' !hours to now' : hours > 0 ? ' !hours from now' : 'now';#}
-                    {#    return  'H:i <sm!all>' + ( hours ? Math.abs(hours) : '' ) + label +'</sm!all>'#}
-                    {#    }#}
                   });
+                let timePicker = timeField.pickatime('picker');
+
                 $('#id_date').pickadate({
                     // Date limits
                     min: 0,
                     max: 6,
                     // Formats
                     format: 'yyyy-mm-dd',
-                    {#format: 'You selecte!d: dddd | dd mmm, yyyy',#}
                     formatSubmit: 'yyyy-mm-dd',
                     // Dropdown selectors
                     selectMonth: false,
                     selectYear: false,
                     // Editable input
                     editable: false,
+                    onSet: function () {
+                        let selectDate = $('#id_date').val();
+                        $.ajax({
+                            url: "{% url 'reservation:create' %}",
+                            type: 'POST',
+                            data: {
+                                selectDate: selectDate,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                            },
+                            success: function (data) {
+                                const disabledTime = data['exclude_time'];
+                                console.log(disabledTime)
+                                if (disabledTime.length){
+                                    timePicker.set('disable', disabledTime)
+                                }
+                                else {
+                                    timePicker.set('disable', false)
+                                }
+                            }
+                        });
+                        if ($('#id_time').val()) {
+                            $('#id_time').val('');
+                        }
+                        else {
+                            $('#id_time').removeAttr('disabled')
+                        }
+                    }
                 });
                 document.querySelectorAll('.paymentWrap input[type=radio]').forEach(function (el) {
                     el.nextSibling.textContent = ''
                 });
-                let input = document.querySelector("#id_phone");
-                window.intlTelInput(input, {
+                $('#id_phone').intlTelInput({
+                    dropdownContainer: document.body,
                     onlyCountries: ["al", "ad", "at", "by", "be", "ba", "bg", "hr", "cz", "dk",
                       "ee", "fo", "fi", "fr", "de", "gi", "gr", "va", "hu", "is", "ie", "it", "lv",
                       "li", "lt", "lu", "mk", "mt", "md", "mc", "me", "nl", "no", "pl", "pt", "ro",
                       "ru", "sm", "rs", "sk", "si", "es", "se", "ch", "ua", "gb", "us"],
                     preferredCountries: ['pl', 'gb', 'de'],
-                    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.6/js/utils.js",
-                    customContainer: ''
-                })
-            });
+                    utilsScript: "{% static 'js/create_form/phone_field/utils.js' %}"
+                });
+
+        })
+
         </script>
 {% endblock %}

@@ -85,25 +85,34 @@ function totalCostKayak(button) {
     }
     submitReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
 }
-function changeFunc(selectOption) {
-    const buttonReservation = document.querySelector('.btn-primary');
+function validateKayak(selectOption) {
     const selectKayak = selectOption.options[selectOption.selectedIndex];
-    if (selectKayak) {
-        buttonReservation.setAttribute('disabled', 'disabled');
-    }
     const idQuantity = String(selectOption.id);
     const inputQuantity = document.querySelector(`#id_details-${idQuantity.match(/\d+/)[0]}-quantity`);
-    const maxQuantity = selectKayak.text.match(/\d+/)[0];
-    inputQuantity.setAttribute('max', maxQuantity);
     inputQuantity.removeAttribute('disabled');
+    $.ajax({
+        url: '/reservation/ajax/load_quantity/',
+        data: {
+            selectKayakId: selectKayak.value,
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function (data) {
+            $(inputQuantity).html(data)
+        }
+    })
 }
-function checkQuantity(inputQuantity) {
-    const buttonAdd = $(inputQuantity).closest('.form-row').find('button')[0];
+function validateQuantity(selectQuantity) {
+    const buttonAdd = $(selectQuantity).closest('.form-row').find('button')[0];
     const buttonReservation = document.querySelector('.btn-primary');
-    if (inputQuantity.value > 0) {
-        const maxValue = parseInt(inputQuantity.getAttribute('max'));
-        if (inputQuantity.value  > maxValue) {
-            inputQuantity.value = maxValue;
+    let totalCost = parseInt(buttonReservation.innerText.replace(/^\D+|\D+$/g, ""));
+    if (selectQuantity.value > 0) {
+        const selectKayak = $(selectQuantity).closest('.form-row').find('select')[0];
+        const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
+        let previousValue = $(selectQuantity).attr('data-old') !== typeof undefined? $(selectQuantity).attr('data-old') :"";
+        let currentValue = $("option:selected",selectQuantity).text();
+        $(selectQuantity).attr('data-old',currentValue);
+        if (!previousValue) {
+            previousValue = 0
         }
         buttonAdd.removeAttribute('disabled');
         buttonReservation.removeAttribute('disabled')
@@ -113,5 +122,13 @@ function checkQuantity(inputQuantity) {
         if ($(buttonAdd).hasClass('add-form-row')) {
             buttonAdd.setAttribute('disabled', 'disabled')
         }
+    }
+    console.log(totalCost);
+    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
+}
+function validatePhone(valueNumber) {
+    if ($(valueNumber).intlTelInput("isValidNumber")) {
+        let getFullNumber = $(valueNumber).intlTelInput("getNumber");
+        $(valueNumber).val(getFullNumber);
     }
 }
