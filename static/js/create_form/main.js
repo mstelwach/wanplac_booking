@@ -9,8 +9,10 @@ function cloneMore(selector, prefix, button) {
     var newElement = $(selector).clone(true);
     var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
     newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
-        if (this.nodeName == 'INPUT' || this.nodeName == 'BUTTON') {
-            this.setAttribute('disabled', 'disabled')
+        if (this.nodeName == 'SELECT' || this.nodeName == 'BUTTON') {
+            if (!this.name.includes('kayak')){
+                this.setAttribute('disabled', 'disabled')
+            }
         }
         var name = $(this).attr('name');
         if(name) {
@@ -34,7 +36,7 @@ function cloneMore(selector, prefix, button) {
     .removeClass('btn-success').addClass('btn-danger')
     .removeClass('add-form-row').addClass('remove-form-row')
     .html('-');
-    // document.querySelector('.btn-primary').removeAttribute('disabled');
+    document.querySelector('.btn-primary').removeAttribute('disabled');
     return false;
 }
 function deleteForm(prefix, btn) {
@@ -73,15 +75,15 @@ function deleteDisabledOption(button, prefix) {
 }
 function totalCostKayak(button) {
     const selectKayak = $(button).closest('.form-row').find('select')[0];
-    const quantityKayak = parseInt($(button).closest('.form-row').find('input').val());
+    const quantityKayak = $(button).closest('.form-row').find('select')[1];
     const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
     const submitReservation = document.querySelector('.btn-primary');
     let totalCost = parseInt(submitReservation.innerText.replace(/^\D+|\D+$/g, ""));
     if ($(button).hasClass('add-form-row')) {
-        totalCost += priceKayak * quantityKayak;
+        totalCost += priceKayak * parseInt($(quantityKayak).val());
     }
     else if ($(button).hasClass('remove-form-row')) {
-        totalCost -= priceKayak * quantityKayak;
+        totalCost -= priceKayak * parseInt($(quantityKayak).val());
     }
     submitReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
 }
@@ -100,22 +102,19 @@ function validateKayak(selectOption) {
             $(inputQuantity).html(data)
         }
     })
+    const buttonReservation = document.querySelector('.btn-primary');
+    buttonReservation.setAttribute('disabled', 'disabled')
 }
 function validateQuantity(selectQuantity) {
     const buttonAdd = $(selectQuantity).closest('.form-row').find('button')[0];
     const buttonReservation = document.querySelector('.btn-primary');
+    const selectKayak = $(selectQuantity).closest('.form-row').find('select')[0];
+    const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
+    let costKayak = selectQuantity.value * priceKayak;
     let totalCost = parseInt(buttonReservation.innerText.replace(/^\D+|\D+$/g, ""));
     if (selectQuantity.value > 0) {
-        const selectKayak = $(selectQuantity).closest('.form-row').find('select')[0];
-        const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
-        let previousValue = $(selectQuantity).attr('data-old') !== typeof undefined? $(selectQuantity).attr('data-old') :"";
-        let currentValue = $("option:selected",selectQuantity).text();
-        $(selectQuantity).attr('data-old',currentValue);
-        if (!previousValue) {
-            previousValue = 0
-        }
         buttonAdd.removeAttribute('disabled');
-        buttonReservation.removeAttribute('disabled')
+        // buttonReservation.removeAttribute('disabled')
     }
     else {
         buttonReservation.setAttribute('disabled', 'disabled');
@@ -123,8 +122,7 @@ function validateQuantity(selectQuantity) {
             buttonAdd.setAttribute('disabled', 'disabled')
         }
     }
-    console.log(totalCost);
-    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
+    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN + ${costKayak}`;
 }
 function validatePhone(valueNumber) {
     if ($(valueNumber).intlTelInput("isValidNumber")) {

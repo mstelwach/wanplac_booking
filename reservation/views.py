@@ -2,7 +2,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
@@ -62,13 +62,15 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
 
     # GET SELECT KAYAK ID , POST DYNAMIC QUANTITY SELECT FIELD
     def get(self, request, *args, **kwargs):
-        if request.is_ajax():
+        if request.is_ajax() and request.GET.get('selectKayakId'):
             kayak_pk = request.GET.get('selectKayakId')
             kayak = Kayak.objects.get(pk=kayak_pk)
             quantity_range = list(range(1, kayak.stock + 1))
             return render(request,
                           'reservation/quantity_dropdown_list_options.html',
                           {'quantity_range': quantity_range})
+        # if request.is_ajax():
+        #     pass
         return super(ReservationCreateView, self).get(request, *args, **kwargs)
 
     # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME

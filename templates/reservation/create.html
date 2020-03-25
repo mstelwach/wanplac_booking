@@ -128,14 +128,14 @@
         <script>
         $(document).on('click', '.add-form-row', function(e){
             e.preventDefault();
-            {#totalCostKayak(this);#}
+            totalCostKayak(this);
             cloneMore('.form-row:last', '{{ kayaks.prefix }}', this);
             setDisabledOption(this);
             return false;
         });
         $(document).on('click', '.remove-form-row', function(e){
             e.preventDefault();
-            {#totalCostKayak(this);#}
+            totalCostKayak(this);
             deleteDisabledOption(this, '{{ kayaks.prefix }}');
             deleteForm('{{ kayaks.prefix }}', $(this));
             return false;
@@ -210,7 +210,6 @@
                     preferredCountries: ['pl', 'gb', 'de'],
                     utilsScript: "{% static 'js/create_form/phone_field/utils.js' %}"
                 });
-
         })
 
         </script>

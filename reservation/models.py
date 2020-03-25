@@ -19,7 +19,10 @@ class Kayak(models.Model):
     price = models.PositiveIntegerField()
 
     def __str__(self):
-        return 'Model: {} | Stock: {} | {} | Cena: {} PLN'.format(self.name, self.stock, self.get_kind_display(), self.price)
+        return 'Model: {} | Ilość: {} | {} | Cena: {} PLN'.format(self.name,
+                                                                  self.stock,
+                                                                  self.get_kind_display(),
+                                                                  self.price)
 
 
 class Route(models.Model):
