@@ -60,7 +60,18 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             context['kayaks'] = ReservationKayakFormSet()
         return context
 
-    # GET DYNAMIC DATE FIELD VALUE, RETURN EXCLUDE_TIME - FORMAT JSON
+    # GET SELECT KAYAK ID , POST DYNAMIC QUANTITY SELECT FIELD
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax():
+            kayak_pk = request.GET.get('selectKayakId')
+            kayak = Kayak.objects.get(pk=kayak_pk)
+            quantity_range = list(range(1, kayak.stock + 1))
+            return render(request,
+                          'reservation/quantity_dropdown_list_options.html',
+                          {'quantity_range': quantity_range})
+        return super(ReservationCreateView, self).get(request, *args, **kwargs)
+
+    # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME
     def post(self, request, *args, **kwargs):
         exclude_date = []
         if request.is_ajax():
@@ -68,7 +79,6 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             reservations = Reservation.objects.filter(date=select_date)
             for reservation in reservations:
                 exclude_date.append((reservation.time.hour, reservation.time.minute))
-            print(exclude_date)
             return JsonResponse({'exclude_time': exclude_date})
         return super(ReservationCreateView, self).post(request, *args, **kwargs)
 
@@ -101,9 +111,3 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
 #         context = super(ReservationPayUPaymentView, self).get_context_data(**kwargs)
 #         context['payment_form'] = PaymentMethodForm(self.object.currency, initial={'order': self.object})
 #         return context
-
-def load_quantity(request):
-    kayak_pk = request.GET.get('selectKayakId')
-    kayak_stock = Kayak.objects.get(pk=kayak_pk).stock
-    quantity_range = [(number, number) for number in range(1, kayak_stock + 1)]
-    return render(request, 'reservation/quantity_dropdown_list_options.html', {'quantity_range': quantity_range})

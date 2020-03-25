@@ -91,7 +91,7 @@ function validateKayak(selectOption) {
     const inputQuantity = document.querySelector(`#id_details-${idQuantity.match(/\d+/)[0]}-quantity`);
     inputQuantity.removeAttribute('disabled');
     $.ajax({
-        url: '/reservation/ajax/load_quantity/',
+        url: '/reservation/create/',
         data: {
             selectKayakId: selectKayak.value,
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),

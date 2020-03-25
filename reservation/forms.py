@@ -63,18 +63,19 @@ class ReservationDetailForm(forms.ModelForm):
         self.fields['kayak'].widget.disabled_choices = [''] + qs_kayaks_not_available
 
         self.fields['quantity'] = forms.ChoiceField(choices=[(0, '---------')])
-        # self.fields['quantity'].choices = [(number, number) for number in range(1, 10 + 1)]
 
-        if 'selectKayakId' in self.data:
-            try:
-                kayak_pk = int(self.data.get('selectKayakId'))
+        for counter in range(len(Kayak.objects.all())):
+            if 'details-{}-kayak'.format(counter) in self.data:
+                kayak_pk = self.data.get('details-{}-kayak'.format(counter))
                 kayak_stock = Kayak.objects.get(pk=kayak_pk).stock
-                self.fields['quantity'].choices = [(str(number), str(number)) for number in range(1, kayak_stock + 1)]
-            except (ValueError, TypeError):
-                pass
+                self.fields['quantity'].choices = [(number, number) for number in range(1, kayak_stock + 1)]
 
 
-ReservationKayakFormSet = inlineformset_factory(
-    Reservation, ReservationDetail, form=ReservationDetailForm, extra=1, can_delete=True
-)
+ReservationKayakFormSet = inlineformset_factory(Reservation,
+                                                ReservationDetail,
+                                                form=ReservationDetailForm,
+                                                extra=1,
+                                                can_delete=True
+                                                )
+
 

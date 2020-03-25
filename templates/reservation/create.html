@@ -181,12 +181,12 @@
                             },
                             success: function (data) {
                                 const disabledTime = data['exclude_time'];
-                                console.log(disabledTime)
                                 if (disabledTime.length){
+                                    timePicker.set('enable', true);
                                     timePicker.set('disable', disabledTime)
                                 }
                                 else {
-                                    timePicker.set('disable', false)
+                                    timePicker.set('disable', false);
                                 }
                             }
                         });
