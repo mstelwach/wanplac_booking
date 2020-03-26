@@ -51,6 +51,13 @@ function deleteForm(prefix, btn) {
             });
         }
     }
+    const buttonReservation = document.querySelector('.btn-primary');
+    $('.form-row').each(function (index, kayak) {
+        const selectKayak = $(kayak).find('select')[0];
+        if (!selectKayak.value) {
+            buttonReservation.setAttribute('disabled', 'disabled')
+        }
+    })
     return false;
 }
 function rangeList(start, end) {
@@ -74,24 +81,32 @@ function deleteDisabledOption(button, prefix) {
     })
 }
 function totalCostKayak(button) {
-    const selectKayak = $(button).closest('.form-row').find('select')[0];
-    const quantityKayak = $(button).closest('.form-row').find('select')[1];
-    const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
-    const submitReservation = document.querySelector('.btn-primary');
-    let totalCost = parseInt(submitReservation.innerText.replace(/^\D+|\D+$/g, ""));
-    if ($(button).hasClass('add-form-row')) {
-        totalCost += priceKayak * parseInt($(quantityKayak).val());
-    }
-    else if ($(button).hasClass('remove-form-row')) {
-        totalCost -= priceKayak * parseInt($(quantityKayak).val());
-    }
-    submitReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
+    const buttonReservation = document.querySelector('.btn-primary');
+    let totalCost = 0;
+    $('.form-row').each(function (index, kayak) {
+        const selectKayak = $(kayak).find('select')[0];
+        let quantityKayak = $(kayak).find('select')[1].value;
+        let priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
+        if (!quantityKayak) {
+            quantityKayak = 0
+        }
+        if (!priceKayak) {
+            priceKayak = 0
+        }
+        totalCost += priceKayak * quantityKayak
+    });
+    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`
 }
 function validateKayak(selectOption) {
     const selectKayak = selectOption.options[selectOption.selectedIndex];
     const idQuantity = String(selectOption.id);
     const inputQuantity = document.querySelector(`#id_details-${idQuantity.match(/\d+/)[0]}-quantity`);
-    inputQuantity.removeAttribute('disabled');
+    const buttonReservation = document.querySelector('.btn-primary');
+    if (selectKayak.value) {
+        inputQuantity.removeAttribute('disabled');
+        buttonReservation.setAttribute('disabled', 'disabled');
+        selectOption.options[0].setAttribute('disabled', 'disabled')
+    }
     $.ajax({
         url: '/reservation/create/',
         data: {
@@ -102,27 +117,27 @@ function validateKayak(selectOption) {
             $(inputQuantity).html(data)
         }
     });
-    const buttonReservation = document.querySelector('.btn-primary');
-    buttonReservation.setAttribute('disabled', 'disabled')
 }
 function validateQuantity(selectQuantity) {
     const buttonAdd = $(selectQuantity).closest('.form-row').find('button')[0];
     const buttonReservation = document.querySelector('.btn-primary');
-    const selectKayak = $(selectQuantity).closest('.form-row').find('select')[0];
-    const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
-    let costKayak = selectQuantity.value * priceKayak;
-    let totalCost = parseInt(buttonReservation.innerText.replace(/^\D+|\D+$/g, ""));
     if (selectQuantity.value > 0) {
         buttonAdd.removeAttribute('disabled');
-        // buttonReservation.removeAttribute('disabled')
+        selectQuantity.options[0].setAttribute('disabled', 'disabled');
+        buttonReservation.removeAttribute('disabled')
     }
-    else {
-        buttonReservation.setAttribute('disabled', 'disabled');
-        if ($(buttonAdd).hasClass('add-form-row')) {
-            buttonAdd.setAttribute('disabled', 'disabled')
+    // SET TOTAL COST KAYAKS
+    let totalCost = 0;
+    $('.form-row').each(function (index, kayak) {
+        const selectKayak = $(kayak).find('select')[0];
+        let quantityKayak = $(kayak).find('select')[1].value;
+        const priceKayak = parseInt(selectKayak.options[selectKayak.selectedIndex].innerText.replace(/.*\D(?=\d)|\D+$/g, ""));
+        if (!quantityKayak) {
+            quantityKayak = 0
         }
-    }
-    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN + ${costKayak}`;
+        totalCost += priceKayak * quantityKayak
+    });
+    buttonReservation.textContent = `Zapłać i zarezerwuj | Kwota: ${totalCost} PLN`;
 }
 function validatePhone(valueNumber) {
     if ($(valueNumber).intlTelInput("isValidNumber")) {

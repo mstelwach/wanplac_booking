@@ -57,11 +57,12 @@ class ReservationDetailForm(forms.ModelForm):
         super(ReservationDetailForm, self).__init__(*args, **kwargs)
         self.fields['kayak'].queryset = Kayak.objects.none()
         self.fields['kayak'].empty_label = 'Musisz wybrać datę'
+
         if 'date' in self.data:
             date = self.data.get('date')
             self.fields['kayak'].queryset = Kayak.objects.filter(date=date)
 
-        self.fields['quantity'] = forms.ChoiceField(choices=[(0, '---------')])
+        self.fields['quantity'] = forms.ChoiceField(choices=[(0, '-------')])
         for counter in range(len(Kayak.objects.all())):
             if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
                 kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
