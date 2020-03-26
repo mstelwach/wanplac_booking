@@ -69,8 +69,13 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             return render(request,
                           'reservation/quantity_dropdown_list_options.html',
                           {'quantity_range': quantity_range})
-        # if request.is_ajax():
-        #     pass
+        if request.is_ajax() and request.GET.get('selectDate'):
+            select_date = request.GET.get('selectDate')
+            kayaks_select_date = Kayak.objects.filter(date=select_date)
+            return render(request,
+                          'reservation/kayak_select_date_dropdown_list.html',
+                          {'kayaks_select_date': kayaks_select_date})
+
         return super(ReservationCreateView, self).get(request, *args, **kwargs)
 
     # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME

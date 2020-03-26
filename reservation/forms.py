@@ -55,17 +55,16 @@ class ReservationDetailForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReservationDetailForm, self).__init__(*args, **kwargs)
-        qs_kayaks_all = [(str(kayak.pk), kayak) for kayak in Kayak.objects.all()]
-        self.fields['kayak'].widget = SelectWidget(attrs={},
-                                                   choices=[('', 'Wybierz kajak')] + qs_kayaks_all,
-                                                   )
-        qs_kayaks_not_available = [str(kayak.id) for kayak in Kayak.objects.filter(available=False)]
-        self.fields['kayak'].widget.disabled_choices = [''] + qs_kayaks_not_available
-        self.fields['quantity'] = forms.ChoiceField(choices=[(0, '---------')])
+        self.fields['kayak'].queryset = Kayak.objects.none()
+        self.fields['kayak'].empty_label = 'Musisz wybrać datę'
+        if 'date' in self.data:
+            date = self.data.get('date')
+            self.fields['kayak'].queryset = Kayak.objects.filter(date=date)
 
+        self.fields['quantity'] = forms.ChoiceField(choices=[(0, '---------')])
         for counter in range(len(Kayak.objects.all())):
-            if 'details-{}-kayak'.format(counter) in self.data:
-                kayak_pk = self.data.get('details-{}-kayak'.format(counter))
+            if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
+                kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
                 kayak = Kayak.objects.get(pk=kayak_pk)
                 self.fields['quantity'].choices = [(number, number) for number in range(1, kayak.stock + 1)]
 
@@ -76,5 +75,3 @@ ReservationKayakFormSet = inlineformset_factory(Reservation,
                                                 extra=1,
                                                 can_delete=True
                                                 )
-
-

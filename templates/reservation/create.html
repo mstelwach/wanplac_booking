@@ -190,6 +190,17 @@
                                 }
                             }
                         });
+                        $.ajax({
+                            url: "{% url 'reservation:create' %}",
+                            data: {
+                                selectDate: selectDate,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success: function (data) {
+                                const selectKayak = $('.add-form-row').closest('.form-row').find('select')[0];
+                                $(selectKayak).html(data)
+                            }
+                        });
                         if ($('#id_time').val()) {
                             $('#id_time').val('');
                         }

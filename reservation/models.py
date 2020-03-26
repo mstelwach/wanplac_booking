@@ -17,6 +17,7 @@ class Kayak(models.Model):
     available = models.BooleanField()
     description = models.TextField(blank=True)
     price = models.PositiveIntegerField()
+    date = models.DateField()
 
     def __str__(self):
         return 'Model: {} | Ilość: {} | {} | Cena: {} PLN'.format(self.name,

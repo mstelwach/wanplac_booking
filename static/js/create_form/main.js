@@ -101,7 +101,7 @@ function validateKayak(selectOption) {
         success: function (data) {
             $(inputQuantity).html(data)
         }
-    })
+    });
     const buttonReservation = document.querySelector('.btn-primary');
     buttonReservation.setAttribute('disabled', 'disabled')
 }
