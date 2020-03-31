@@ -1,26 +1,16 @@
 (function ($) {
-    $('.booking-container').on('click', function (e) {
+    $('.booking-tab').on('click', function (e) {
       e.preventDefault();
-      const bookingHeader = this;
-      const elementTab = this.querySelector('.tab-text');
+      const bookingTab = this;
+      const bookingContainer = $(bookingTab).closest('.booking-container')[0];
+      const bookingDetail = $(bookingContainer).next();
+      $(bookingDetail).toggleClass('hide');
 
-      if (bookingHeader.classList.contains('active')) {
-          bookingHeader.classList.remove('active');
-          elementTab.firstElementChild.innerHTML = 'Rozwiń'
-      }
-      else {
-          bookingHeader.classList.add('active');
-          elementTab.firstElementChild.innerHTML = 'Schowaj'
-      }
-
-      const bookingDetail = this.nextElementSibling;
-        if (bookingDetail.classList.contains('hide')) {
-            bookingDetail.classList.remove('hide')
-        }
-        else {
-            bookingDetail.classList.add('hide')
-        }
+      // CHANGE TEXT BUTTON
+      $(bookingTab).html($(bookingTab).html() == '<b>Ukryj szczegóły rekrutacji</b>' ?
+      '<b>Kliknij, aby rozwinąć szczegóły rekrutacji</b>' : '<b>Ukryj szczegóły rekrutacji</b>');
     });
+
     $('.nav-pills li a').filter(function(){return this.href==location.href}).parent().addClass('active').siblings().removeClass('active');
     $('.nav-pills li a').click(function(){
 			$(this).parent().addClass('active').siblings().removeClass('active')

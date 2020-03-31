@@ -9,5 +9,7 @@ urlpatterns = [
     url(r'^logout/$', Logout.as_view(), name='logout'),
     url(r'^list/$', ReservationListView.as_view(), name='list'),
     url(r'^create/$', ReservationCreateView.as_view(), name='create'),
+    url(r'^update/(?P<pk>[\d]+)/$', ReservationUpdateView.as_view(), name='update'),
+    url(r'^delete/(?P<pk>[\d]+)/$', ReservationDeleteView.as_view(), name='delete')
     # url(r'^(?P<pk>[\d]+)/payu/process/$', ReservationPayUPaymentView.as_view(), name='payu-process'),
 ]

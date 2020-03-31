@@ -28,7 +28,7 @@ class SelectWidget(Select):
         return option_dict
 
 
-class ReservationCreateUpdateForm(forms.ModelForm):
+class ReservationCreateForm(forms.ModelForm):
 
     class Meta:
         model = Reservation
@@ -41,7 +41,7 @@ class ReservationCreateUpdateForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(ReservationCreateUpdateForm, self).__init__(*args, **kwargs)
+        super(ReservationCreateForm, self).__init__(*args, **kwargs)
         self.fields['route'].empty_label = 'Wybierz szlak'
         self.fields['payment'] = forms.ChoiceField(choices=PAYMENT_METHOD,
                                                    widget=forms.RadioSelect(attrs={'id': 'value'}))
@@ -76,3 +76,53 @@ ReservationKayakFormSet = inlineformset_factory(Reservation,
                                                 extra=1,
                                                 can_delete=True
                                                 )
+
+
+class ReservationUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = Reservation
+        exclude = ['user', 'status', 'created', 'paid', 'currency', 'payment']
+        widgets = {
+            'first_name': TextInput(attrs={'placeholder': 'Imię potrzebne do rezerwacji'}),
+            'last_name': TextInput(attrs={'placeholder': 'Nazwisko potrzebne do rezerwacji'}),
+            'date': TextInput(attrs={'placeholder': 'Data rezerwacji'}),
+            'time': TextInput(attrs={'placeholder': 'Godzina rezerwacji'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ReservationUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['route'].empty_label = 'Wybierz szlak'
+
+
+class ReservationDetailUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = ReservationDetail
+        exclude = ()
+
+    def __init__(self, *args, **kwargs):
+        super(ReservationDetailUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['kayak'].empty_label = 'Musisz wybrać datę'
+
+        if kwargs.get('instance'):
+            reservation_detail = kwargs['instance']
+            reservation = Reservation.objects.get(pk=reservation_detail.reservation.pk)
+
+        # if 'date' in self.data:
+        #     date = self.data.get('date')
+        #     self.fields['kayak'].queryset = Kayak.objects.filter(date=date)
+
+        # for counter in range(len(Kayak.objects.all())):
+        #     if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
+        #         kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
+        #         kayak = Kayak.objects.get(pk=kayak_pk)
+        #         self.fields['quantity'].choices = [(number, number) for number in range(1, kayak.stock + 1)]
+
+
+ReservationKayakUpdateFormset = inlineformset_factory(Reservation,
+                                                      ReservationDetail,
+                                                      form=ReservationDetailUpdateForm,
+                                                      extra=0,
+                                                      can_delete=True
+                                                      )

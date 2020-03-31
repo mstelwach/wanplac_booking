@@ -2,6 +2,7 @@
 {% load bootstrap4 %}
 {% load widget_tweaks %}
 {% load mathfilters %}
+{% load static %}
 
 <head>
 {% block title %} Moje rezerwacje {% endblock %}
@@ -11,30 +12,62 @@
 
     <div class="list-group" id="myList">
         {% for reservation in object_list %}
-              <a href="" class="list-group-item list-group-item-action flex-column align-items-start booking-container">
+              <div class="list-group-item flex-column align-items-start booking-container">
                   <div class="d-flex w-100 justify-content-between col-sm col-lg">
                       <h5 class="mb-1">Rezerwacja nr. {{ reservation.id }} na {{ reservation.first_name }} {{ reservation.last_name }}</h5>
+                      <a href="{% url 'reservation:update' reservation.pk %}" style="position: absolute; top: 15px; right: 40px"><i class="fa fa-edit fa-lg"></i></a>
+                      <a href="#myModal" style="position: absolute; top: 15px; right: 10px" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash fa-lg"></i></a>
+
+                      <!-- Modal HTML -->
+                        <div id="myModal" class="modal fade">
+                            <div class="modal-dialog modal-confirm">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div class="icon-box">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </div>
+                                        <h4 class="modal-title">Jesteś pewny?</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Czy na pewo chcesz usunąć rezerwację? Operacji nie można cofnąć.</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-info" data-dismiss="modal">Cofnij</button>
+                                        <button type="button" class="btn btn-danger" onclick="location.href='{% url 'reservation:delete' reservation.pk %}'">Usuń</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      <!-- Modal HTML -->
                   </div>
                   <div class="d-flex w-100 justify-content-between col-sm col-lg">
                       <p class="mb-1">Trasa: {{ reservation.route }}</p>
-                      <p class="mb-2 tab-text">Sprzęt: <b>Rozwiń</b></p>
+                      <p class="mb-2 tab-text">Sprzęt: <a class="mb-2 tab-text booking-tab" role="button"><b>Kliknij, aby rozwinąć szczegóły rekrutacji</b></a></p>
                   </div>
+                  <br>
                   <div class="col-sm-10 col-lg-12">
                       {% if reservation.status == 'unconfirmed' %}
-                          <small class="pull-right">Nieopłacona</small><span class="dot dot-warning pull-right"></span>
+                          <button class="btn btn-sm btn-warning pull-right">Nieopłacona</button>
+{#                          <small class="pull-right">Nieopłacona</small><span class="dot dot-warning pull-right"></span>#}
                       {% elif reservation.status == 'active' %}
-                          <small class="pull-right">Aktywna</small><span class="dot dot-success pull-right"></span>
+                          <button class="btn btn-sm btn-success pull-right">Aktywna</button>
+{#                          <small class="pull-right">Aktywna</small><span class="dot dot-success pull-right"></span>#}
                       {% else %}
-                          <small class="pull-right">Zakończona</small><span class="dot dot-dark pull-right"></span>
+                          <button class="btn btn-sm btn-dark pull-right">Zakończona</button>
+{#                          <small class="pull-right">Zakończona</small><span class="dot dot-dark pull-right"></span>#}
                       {% endif %}
+                      <br>
                       <br>
                       <small class="pull-right">Data rezerwacji: {{ reservation.date|date:'Y-m-d' }}, godz: {{ reservation.time|time:'h:i'}}</small>
                   </div>
                   <br>
                   <br>
-              </a>
+                  <br>
+              </div>
 
-              <div class="list-group-item list-group-item-success flex-column align-items hide">
+            {# BOOKIN DETAIL - DIV ACTIVE/HIDE #}
+              <div class="list-group-item list-group-item-info flex-column align-items booking-detail hide">
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Sprzęt:</h5>
                     {% for detail in reservation.details.all %}
@@ -46,4 +79,10 @@
     {% endfor %}
     </div>
 
+{% endblock %}
+
+{% block body_scripts_additional %}
+    <script>
+        $('#myModal').modal(options)
+    </script>
 {% endblock %}

@@ -5,8 +5,9 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
-from reservation.forms import ReservationCreateUpdateForm, ReservationKayakFormSet
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from reservation.forms import ReservationCreateForm, ReservationKayakFormSet, ReservationKayakUpdateFormset, \
+    ReservationUpdateForm
 from reservation.models import Reservation, Kayak
 from reservation.tasks import check_quantity_kayak
 import datetime
@@ -44,7 +45,7 @@ class ReservationListView(LoginRequiredMixin, ListView):
 
 class ReservationCreateView(LoginRequiredMixin, CreateView):
     model = Reservation
-    form_class = ReservationCreateUpdateForm
+    form_class = ReservationCreateForm
     template_name = 'reservation/create.html'
 
     def get_success_url(self):
@@ -69,13 +70,13 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             return render(request,
                           'reservation/quantity_dropdown_list_options.html',
                           {'quantity_range': quantity_range})
+
         if request.is_ajax() and request.GET.get('selectDate'):
             select_date = request.GET.get('selectDate')
             kayaks_select_date = Kayak.objects.filter(date=select_date)
             return render(request,
                           'reservation/kayak_select_date_dropdown_list.html',
                           {'kayaks_select_date': kayaks_select_date})
-
         return super(ReservationCreateView, self).get(request, *args, **kwargs)
 
     # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME
@@ -109,6 +110,71 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
                     detail.kayak.save()
         return super(ReservationCreateView, self).form_valid(form)
 
+
+class ReservationUpdateView(LoginRequiredMixin, UpdateView):
+    model = Reservation
+    form_class = ReservationUpdateForm
+    template_name = 'reservation/update.html'
+    success_url = reverse_lazy('reservation:list')
+
+    def get_context_data(self, **kwargs):
+        context = super(ReservationUpdateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['kayaks'] = ReservationKayakUpdateFormset(self.request.POST, instance=self.object)
+        else:
+            context['kayaks'] = ReservationKayakUpdateFormset(instance=self.object)
+        return context
+
+    # GET SELECT KAYAK ID , POST DYNAMIC QUANTITY SELECT FIELD
+    def get(self, request, *args, **kwargs):
+        if request.is_ajax() and request.GET.get('selectKayakId'):
+            kayak = Kayak.objects.get(pk=request.GET.get('selectKayakId'))
+            quantity_range = list(range(1, kayak.stock + 1))
+            return render(request,
+                          'reservation/quantity_dropdown_list_options.html',
+                          {'quantity_range': quantity_range})
+
+        # if request.is_ajax() and request.GET.get('selectDate'):
+        #     kayaks_filter_date = Kayak.objects.filter(date=request.GET.get('selectDate'))
+        #     tmp = [detail.kayak for detail in self.get_object().details.all()]
+        #     arr = [(True, kayak) if kayak in tmp else (False, kayak) for kayak in kayaks_filter_date]
+        #     return render(request,
+        #                   'reservation/kayak_select_date_dropdown_list.html',
+        #                   {'kayaks_select_date': kayaks_filter_date})
+        return super(ReservationUpdateView, self).get(request, *args, **kwargs)
+
+    # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME
+    def post(self, request, *args, **kwargs):
+        exclude_time = []
+        if request.is_ajax():
+            select_date = request.POST.get('selectDate')
+            reservations = Reservation.objects.filter(date=select_date)
+            for reservation in reservations:
+                exclude_time.append((reservation.time.hour, reservation.time.minute))
+            return JsonResponse({'exclude_time': exclude_time})
+        return super(ReservationUpdateView, self).post(*args, **kwargs)
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        kayaks = context['kayaks']
+        with transaction.atomic():
+            reservation = form.save()
+            if kayaks.is_valid():
+                kayaks.instance = reservation
+                kayaks.save()
+        return super(ReservationUpdateView, self).form_valid(form)
+
+
+class ReservationDeleteView(LoginRequiredMixin, DeleteView):
+    model = Reservation
+    success_url = reverse_lazy('reservation:list')
+
+    def get(self, *args, **kwargs):
+        return self.post(*args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        delete = super(ReservationDeleteView, self).delete(request, *args, **kwargs)
+        return delete
 
 # class ReservationPayUPaymentView(DetailView):
 #     model = Reservation

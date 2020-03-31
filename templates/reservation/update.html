@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+{% load widget_tweaks %}
+{% load static %}
+
+<head>
+
+    {% block head_scripts_additional %}
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,400i,700" rel="stylesheet">
+	    <link type="text/css" rel="stylesheet" href="{% static 'css/create_form/style.css' %}" />
+        <!--PickaTime CSS-->
+        <link rel="stylesheet" href="{% static 'css/create_form/date_time_fields/style.css' %}">
+        <!--Intl-Tel-Input CSS-->
+        <link type="text/css" rel="stylesheet" href="{% static 'css/create_form/phone_field/style.css' %}"/>
+        <script src="{% static 'js/create_form/main.js' %}"></script>
+
+    {% endblock %}
+
+</head>
+
+{% block content %}
+    <div class="row spacer">
+        <div class="booking-form">
+            <form  role=form method="post">
+            {% csrf_token %}
+                <div class="form-group">
+                    <span class="form-label control-label">Imię</span>
+                    {% render_field form.first_name class+='form-control' %}
+                </div>
+                <div class="form-group has-feedback">
+                    <span class="form-label control-label">Nazwisko</span>
+                    {% render_field form.last_name class+='form-control' %}
+                </div>
+                <div class="row no-margin">
+                    <div class="col-sm-6">
+                        <div class="form-group has-feedback">
+                            <span class="form-label control-label">Data</span>
+                            {% render_field form.date class+='form-control' %}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <span class="form-label">Godzina</span>
+                            {% render_field form.time class+='form-control'%}
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-margin">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <span class="form-label">Telefon</span>
+                            <br>
+                            {% render_field form.phone class+='form-control' onchange="validatePhone(this);" %}
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                          <div class="form-group">
+                    <span class="form-label">Trasa wyprawy</span>
+                    {% render_field form.route class+='form-control' %}
+                    <span class="select-arrow"></span>
+                </div>
+                    </div>
+                </div>
+{#                {{ kayaks.management_form }}#}
+{#                {% for form in kayaks %}#}
+{#                <div class="row form-row spacer no-margin">#}
+{#                      <div class="col-sm-7">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label">Kajak</span>#}
+{#                                {% render_field form.kayak class+='form-control' onchange="validateKayak(this);"%}#}
+{#                                <span class="select-arrow"></span>#}
+{#                            </div>#}
+{#                      </div>#}
+{#                        <div class="col-sm-2">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label">Ilość</span>#}
+{#                                {% render_field form.quantity class+='form-control' onchange="validateQuantity(this);" %}#}
+{#                                <span class="select-arrow"></span>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-sm-2">#}
+{#                            <div class="form-group">#}
+{#                                <span class="form-label"><br></span>#}
+{#                                <button class="btn btn-danger remove-form-row" style="display: block; width: 50%; height: 40px; padding: 6px 12px; border: 4px; line-height: 1.42857143">-</button>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                </div>#}
+{#                {% endfor %}#}
+                <div class="col-4 offset-2 form-group">
+                    <button type="submit" class="btn btn-block btn-primary">Zaaktualizuj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_scripts_additional %}
+    <!--Main JS-->
+        <script src="{% static 'js/create_form/main.js' %}"></script>
+    <!--PickaTime JS-->
+        <script src="{% static 'js/create_form/date_time_fields/picker.js' %}"></script>
+        <script src="{% static 'js/create_form/date_time_fields/pl_PL.js' %}"></script>
+
+    <!--Intl-Tel-Input JS-->
+        <script src="{% static 'js/create_form/phone_field/intlTelInput-jquery.js' %}"></script>
+
+        <script>
+        $(document).on('click', '.add-form-row', function(e){
+            e.preventDefault();
+            cloneMore('.form-row:last', '{{ kayaks.prefix }}', this);
+            setDisabledOption(this);
+            return false;
+        });
+        $(document).on('click', '.remove-form-row', function(e){
+            e.preventDefault();
+            deleteDisabledOption(this, '{{ kayaks.prefix }}');
+            deleteForm('{{ kayaks.prefix }}', $(this));
+            if ($('.remove-form-row').length <=1 ) {
+                const firstKayak = $('.remove-form-row:first');
+                $(firstKayak).removeClass('btn-danger').addClass('btn-success');
+                $(firstKayak).removeClass('remove-form-row').addClass('add-form-row')
+                $(firstKayak).text('+')
+            }
+            return false;
+        });
+
+        $(document).ready(function() {
+                let timeField = $('#id_time').pickatime({
+                    // Time limits
+                    min: [9,0],
+                    max: [12,0],
+                    // Time intervals
+                    interval: 15,
+                    // Editable input
+                    editable: false,
+                    // Formats
+                    format: 'H:i',
+                    formatSubmit: 'H:i',
+                    formatLabel: '<b>H</b>:i',
+                  });
+                let timePicker = timeField.pickatime('picker');
+
+                $('#id_date').pickadate({
+                    // Date limits
+                    min: 0,
+                    max: 6,
+                    // Formats
+                    format: 'yyyy-mm-dd',
+                    formatSubmit: 'yyyy-mm-dd',
+                    // Dropdown selectors
+                    selectMonth: false,
+                    selectYear: false,
+                    // Editable input
+                    editable: false,
+                    onSet: function () {
+                        let selectDate = $('#id_date').val();
+                        $.ajax({
+                            url: "{% url 'reservation:update' object.pk %}",
+                            type: 'POST',
+                            data: {
+                                selectDate: selectDate,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+                            },
+                            success: function (data) {
+                                const disabledTime = data['exclude_time'];
+                                if (disabledTime.length){
+                                    timePicker.set('enable', true);
+                                    timePicker.set('disable', disabledTime)
+                                }
+                                else {
+                                    timePicker.set('disable', false);
+                                }
+                            }
+                        });
+                        $.ajax({
+                            url: "{% url 'reservation:update' object.pk %}",
+                            data: {
+                                selectDate: selectDate,
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success: function (data) {
+                                $('.form-row').each(function (index, formKayak) {
+                                    const selectKayak = $(formKayak).find('select')[0];
+                                    $(selectKayak).html(data)
+                                })
+                            }
+                        });
+                        if ($('#id_time').val()) {
+                            $('#id_time').val('');
+                        }
+                        else {
+                            $('#id_time').removeAttr('disabled')
+                        }
+                    }
+                });
+                document.querySelectorAll('.paymentWrap input[type=radio]').forEach(function (el) {
+                    el.nextSibling.textContent = ''
+                });
+                $('#id_phone').intlTelInput({
+                    dropdownContainer: document.body,
+                    onlyCountries: ["al", "ad", "at", "by", "be", "ba", "bg", "hr", "cz", "dk",
+                      "ee", "fo", "fi", "fr", "de", "gi", "gr", "va", "hu", "is", "ie", "it", "lv",
+                      "li", "lt", "lu", "mk", "mt", "md", "mc", "me", "nl", "no", "pl", "pt", "ro",
+                      "ru", "sm", "rs", "sk", "si", "es", "se", "ch", "ua", "gb", "us"],
+                    preferredCountries: ['pl', 'gb', 'de'],
+                    utilsScript: "{% static 'js/create_form/phone_field/utils.js' %}"
+                });
+                if ($('.remove-form-row').length <=1 ) {
+                    const firstKayak = $('.remove-form-row:first');
+                    $(firstKayak).removeClass('btn-danger').addClass('btn-success');
+                    $(firstKayak).removeClass('remove-form-row').addClass('add-form-row');
+                    $(firstKayak).text('+')
+                }
+                {#$.ajax({#}
+                {#    url: "{% url 'reservation:update' object.pk %}",#}
+                {#    data: {#}
+                {#        selectDate: $('#id_date').val(),#}
+                {#        csrfmiddlewaretoken: '{{ csrf_token }}',#}
+                {#    },#}
+                {#    success: function (data) {#}
+                {#        $('.form-row').each(function (index, formKayak) {#}
+                {#            const selectKayak = $(formKayak).find('select')[0];#}
+                {#            $(selectKayak).html(data)#}
+                {#        })#}
+                {#    }#}
+                {#});#}
+        })
+
+        </script>
+{% endblock %}
