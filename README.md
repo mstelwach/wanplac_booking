@@ -1,3 +1,3 @@
 # wanplac_booking
 test version
-![Demonstrative image](https://imgur.com/YrcEPxU)
+![Demonstrative image](https://ibb.co/d7HY1x4)
