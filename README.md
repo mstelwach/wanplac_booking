@@ -1,3 +1,3 @@
 # wanplac_booking
 test version
-![Demonstrative image](https://ibb.co/d7HY1x4)
+![](https://github.com/mstelwach/wanplac_booking/blob/master/demonstrative_image.png | width=100)
