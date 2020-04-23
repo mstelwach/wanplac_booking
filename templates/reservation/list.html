@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load bootstrap4 %}
-{% load widget_tweaks %}
-{% load mathfilters %}
 {% load static %}
+{% load l10n %}
+
 
 <head>
 {% block title %} Moje rezerwacje {% endblock %}
@@ -15,8 +15,8 @@
               <div class="list-group-item flex-column align-items-start booking-container">
                   <div class="d-flex w-100 justify-content-between col-sm col-lg">
                       <h5 class="mb-1">Rezerwacja nr. {{ reservation.id }} na {{ reservation.first_name }} {{ reservation.last_name }}</h5>
-                      <a href="{% url 'reservation:update' reservation.pk %}" style="position: absolute; top: 15px; right: 40px"><i class="fa fa-edit fa-lg"></i></a>
-                      <a href="#myModal" style="position: absolute; top: 15px; right: 10px" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash fa-lg"></i></a>
+                      <a href="{% url 'reservation:update' reservation.pk %}" style="position: absolute; top: 15px; right: 2.5em"><i class="fa fa-edit"></i></a>
+                      <a href="#myModal" style="position: absolute; top: 15px; right: 1em" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash"></i></a>
 
                       <!-- Modal HTML -->
                         <div id="myModal" class="modal fade">
@@ -40,33 +40,21 @@
                             </div>
                         </div>
                       <!-- Modal HTML -->
-                  </div>
-                  <div class="d-flex w-100 justify-content-between col-sm col-lg">
                       <p class="mb-1">Trasa: {{ reservation.route }}</p>
-                      <p class="mb-2 tab-text">Sprzęt: <a class="mb-2 tab-text booking-tab" role="button"><b>Kliknij, aby rozwinąć szczegóły rekrutacji</b></a></p>
-                  </div>
-                  <br>
-                  <div class="col-sm-10 col-lg-12">
+                        <p class="mb-2 tab-text">Data rezerwacji: <em>{{ reservation.date|date:'l'|localize }}</em> <strong>{{ reservation.date|date:'F' }}</strong> <span>{{ reservation.date|date:'j' }}</span></p>
+                        <p class="mb-2 tab-text">Godzina rezerwacji: <strong>{{ reservation.time|time:'h:i' }}</strong></p>
                       {% if reservation.status == 'unconfirmed' %}
                           <button class="btn btn-sm btn-warning pull-right">Nieopłacona</button>
-{#                          <small class="pull-right">Nieopłacona</small><span class="dot dot-warning pull-right"></span>#}
                       {% elif reservation.status == 'active' %}
                           <button class="btn btn-sm btn-success pull-right">Aktywna</button>
-{#                          <small class="pull-right">Aktywna</small><span class="dot dot-success pull-right"></span>#}
                       {% else %}
                           <button class="btn btn-sm btn-dark pull-right">Zakończona</button>
-{#                          <small class="pull-right">Zakończona</small><span class="dot dot-dark pull-right"></span>#}
                       {% endif %}
-                      <br>
-                      <br>
-                      <small class="pull-right">Data rezerwacji: {{ reservation.date|date:'Y-m-d' }}, godz: {{ reservation.time|time:'h:i'}}</small>
+                        <p class="mb-2 tab-text">Sprzęt: <a class="mb-2 tab-text booking-tab" role="button"><b>Kliknij, aby rozwinąć szczegóły rekrutacji</b></a></p>
                   </div>
-                  <br>
-                  <br>
-                  <br>
               </div>
 
-            {# BOOKIN DETAIL - DIV ACTIVE/HIDE #}
+            {# BOOKING DETAIL - DIV ACTIVE/HIDE #}
               <div class="list-group-item list-group-item-info flex-column align-items booking-detail hide">
                   <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Sprzęt:</h5>
@@ -79,10 +67,4 @@
     {% endfor %}
     </div>
 
-{% endblock %}
-
-{% block body_scripts_additional %}
-    <script>
-        $('#myModal').modal(options)
-    </script>
 {% endblock %}

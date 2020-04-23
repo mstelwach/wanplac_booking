@@ -1,5 +1,5 @@
 <option value="">Wybierz kajak</option>
-{% for kayak in kayaks_select_date %}
+{% for kayak in kayaks_filter_date %}
     {% if kayak.available %}
         <option value="{{ kayak.pk }}">{{ kayak }}</option>
     {% else %}

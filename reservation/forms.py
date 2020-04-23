@@ -1,6 +1,6 @@
 from django import forms
-from django.forms import inlineformset_factory, TextInput, Select, BaseInlineFormSet
-from reservation.models import Reservation, ReservationDetail, Kayak, PAYMENT_METHOD
+from django.forms import inlineformset_factory, TextInput, Select
+from reservation.models import Reservation, ReservationDetail, Kayak, PAYMENT_METHOD, StockDateKayak
 
 
 class SelectWidget(Select):
@@ -39,10 +39,22 @@ class ReservationCreateForm(forms.ModelForm):
             'date': TextInput(attrs={'placeholder': 'Data rezerwacji'}),
             'time': TextInput(attrs={'placeholder': 'Godzina rezerwacji'}),
         }
+        labels = {
+            'first_name': 'Imię',
+            'last_name': 'Nazwisko',
+            'date': 'Data',
+            'time': 'Godzina',
+            'phone': 'Telefon',
+            'route': 'Trasa'
+        }
+        help_texts = {
+            'first_name': 'Pozostaw puste pole, jeżeli chcesz aby rezerwacja została dokonana na twoje imię.',
+            'last_name': 'Pozostaw puste pole, jeżeli chcesz aby rezerwacja została dokonana na twoje nazwisko.'
+        }
 
     def __init__(self, *args, **kwargs):
         super(ReservationCreateForm, self).__init__(*args, **kwargs)
-        self.fields['route'].empty_label = 'Wybierz szlak'
+        self.fields['route'].empty_label = 'Wybierz'
         self.fields['payment'] = forms.ChoiceField(choices=PAYMENT_METHOD,
                                                    widget=forms.RadioSelect(attrs={'id': 'value'}))
 
@@ -52,6 +64,19 @@ class ReservationDetailForm(forms.ModelForm):
     class Meta:
         model = ReservationDetail
         exclude = ()
+        labels = {
+            'kayak': 'Kajak',
+            'quantity': 'Ilość'
+        }
+        widgets = {
+            'kayak': Select(attrs={
+                'onchange': 'validateKayak(this);'
+            }),
+            'quantity': Select(attrs={
+                'onchange': 'validateQuantity(this);',
+                'disabled': 'disabled'
+            })
+        }
 
     def __init__(self, *args, **kwargs):
         super(ReservationDetailForm, self).__init__(*args, **kwargs)
@@ -60,14 +85,16 @@ class ReservationDetailForm(forms.ModelForm):
 
         if 'date' in self.data:
             date = self.data.get('date')
-            self.fields['kayak'].queryset = Kayak.objects.filter(date=date)
+            self.fields['kayak'].queryset = Kayak.objects.filter(stockdatekayak__date=date)
 
-        self.fields['quantity'] = forms.ChoiceField(choices=[(0, '-------')])
-        for counter in range(len(Kayak.objects.all())):
-            if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
-                kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
-                kayak = Kayak.objects.get(pk=kayak_pk)
-                self.fields['quantity'].choices = [(number, number) for number in range(1, kayak.stock + 1)]
+            self.fields['quantity'] = forms.ChoiceField(choices=[(0, '-------')])
+            for counter in range(len(Kayak.objects.all())):
+                if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
+                    kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
+                    kayak = Kayak.objects.get(pk=kayak_pk)
+                    stock_date_kayak = StockDateKayak.objects.get(kayak=kayak, date=date)
+                    self.fields['quantity'].choices = [(number, number) for number in range(1,
+                                                                                            stock_date_kayak.stock + 1)]
 
 
 ReservationKayakFormSet = inlineformset_factory(Reservation,
@@ -89,40 +116,19 @@ class ReservationUpdateForm(forms.ModelForm):
             'date': TextInput(attrs={'placeholder': 'Data rezerwacji'}),
             'time': TextInput(attrs={'placeholder': 'Godzina rezerwacji'}),
         }
+        labels = {
+            'first_name': 'Imię',
+            'last_name': 'Nazwisko',
+            'date': 'Data',
+            'time': 'Godzina',
+            'phone': 'Telefon',
+            'route': 'Trasa'
+        }
+        help_texts = {
+            'first_name': 'Pozostaw puste pole, jeżeli chcesz aby rezerwacja została dokonana na twoje imię.',
+            'last_name': 'Pozostaw puste pole, jeżeli chcesz aby rezerwacja została dokonana na twoje nazwisko.'
+        }
 
     def __init__(self, *args, **kwargs):
         super(ReservationUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['route'].empty_label = 'Wybierz szlak'
-
-
-class ReservationDetailUpdateForm(forms.ModelForm):
-
-    class Meta:
-        model = ReservationDetail
-        exclude = ()
-
-    def __init__(self, *args, **kwargs):
-        super(ReservationDetailUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['kayak'].empty_label = 'Musisz wybrać datę'
-
-        if kwargs.get('instance'):
-            reservation_detail = kwargs['instance']
-            reservation = Reservation.objects.get(pk=reservation_detail.reservation.pk)
-
-        # if 'date' in self.data:
-        #     date = self.data.get('date')
-        #     self.fields['kayak'].queryset = Kayak.objects.filter(date=date)
-
-        # for counter in range(len(Kayak.objects.all())):
-        #     if 'details-{}-kayak'.format(counter) in self.data and self.data['details-{}-kayak'.format(counter)]:
-        #         kayak_pk = int(self.data.get('details-{}-kayak'.format(counter)))
-        #         kayak = Kayak.objects.get(pk=kayak_pk)
-        #         self.fields['quantity'].choices = [(number, number) for number in range(1, kayak.stock + 1)]
-
-
-ReservationKayakUpdateFormset = inlineformset_factory(Reservation,
-                                                      ReservationDetail,
-                                                      form=ReservationDetailUpdateForm,
-                                                      extra=0,
-                                                      can_delete=True
-                                                      )
+        self.fields['route'].empty_label = 'Wybierz'

@@ -2,15 +2,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from reservation.forms import ReservationCreateForm, ReservationKayakFormSet, ReservationKayakUpdateFormset, \
-    ReservationUpdateForm
-from reservation.models import Reservation, Kayak
+from reservation.forms import ReservationCreateForm, ReservationKayakFormSet, ReservationUpdateForm
+from reservation.models import Reservation, Kayak, Route, StockDateKayak
 from reservation.tasks import check_quantity_kayak
-import datetime
 
 
 def home_page(request):
@@ -35,12 +33,7 @@ class ReservationListView(LoginRequiredMixin, ListView):
     template_name = 'reservation/list.html'
 
     def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
-
-    def get_context_data(self, *args, **kwargs):
-        data = super(ReservationListView, self).get_context_data(*args, **kwargs)
-        data['today'] = datetime.date.today()
-        return data
+        return Reservation.objects.filter(user=self.request.user)
 
 
 class ReservationCreateView(LoginRequiredMixin, CreateView):
@@ -65,29 +58,31 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
     def get(self, request, *args, **kwargs):
         if request.is_ajax() and request.GET.get('selectKayakId'):
             kayak_pk = request.GET.get('selectKayakId')
+            select_date = request.GET.get('selectDate')
             kayak = Kayak.objects.get(pk=kayak_pk)
-            quantity_range = list(range(1, kayak.stock + 1))
+            stock_date_kayak = StockDateKayak.objects.get(kayak=kayak, date=select_date)
+            quantity_range = list(range(1, stock_date_kayak.stock + 1))
             return render(request,
                           'reservation/quantity_dropdown_list_options.html',
                           {'quantity_range': quantity_range})
 
         if request.is_ajax() and request.GET.get('selectDate'):
             select_date = request.GET.get('selectDate')
-            kayaks_select_date = Kayak.objects.filter(date=select_date)
+            kayaks_filter_date = Kayak.objects.filter(stockdatekayak__date=select_date)
             return render(request,
                           'reservation/kayak_select_date_dropdown_list.html',
-                          {'kayaks_select_date': kayaks_select_date})
+                          {'kayaks_filter_date': kayaks_filter_date})
         return super(ReservationCreateView, self).get(request, *args, **kwargs)
 
     # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME
     def post(self, request, *args, **kwargs):
-        exclude_date = []
+        exclude_time = []
         if request.is_ajax():
             select_date = request.POST.get('selectDate')
             reservations = Reservation.objects.filter(date=select_date)
             for reservation in reservations:
-                exclude_date.append((reservation.time.hour, reservation.time.minute))
-            return JsonResponse({'exclude_time': exclude_date})
+                exclude_time.append((reservation.time.hour, reservation.time.minute))
+            return JsonResponse({'exclude_time': exclude_time})
         return super(ReservationCreateView, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -103,11 +98,14 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
             if kayaks.is_valid():
                 kayaks.instance = reservation
                 kayaks.save()
+                date = form.cleaned_data['date']
                 for detail in kayaks.instance.details.all():
-                    detail.kayak.stock -= detail.quantity
-                    if not detail.kayak.stock:
-                        detail.kayak.available = False
-                    detail.kayak.save()
+                    stock_date_kayak = StockDateKayak.objects.get(kayak=detail.kayak, date=date)
+                    stock_date_kayak.stock -= detail.quantity
+                    # if not stock_date_kayak.stock:
+                    #     detail.kayak.available = False
+                    # detail.kayak.save()
+                    stock_date_kayak.save()
         return super(ReservationCreateView, self).form_valid(form)
 
 
@@ -119,29 +117,15 @@ class ReservationUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(ReservationUpdateView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['kayaks'] = ReservationKayakUpdateFormset(self.request.POST, instance=self.object)
-        else:
-            context['kayaks'] = ReservationKayakUpdateFormset(instance=self.object)
+        reservation = self.get_object()
+        disable_date = []
+        for detail in reservation.details.all():
+            stock_date_kayak = StockDateKayak.objects.filter(kayak=detail.kayak)
+            for stock_date in stock_date_kayak:
+                if stock_date.stock < detail.quantity:
+                    disable_date.append([stock_date.date.year, stock_date.date.month-1, stock_date.date.day])
+        context['disable_date'] = disable_date
         return context
-
-    # GET SELECT KAYAK ID , POST DYNAMIC QUANTITY SELECT FIELD
-    def get(self, request, *args, **kwargs):
-        if request.is_ajax() and request.GET.get('selectKayakId'):
-            kayak = Kayak.objects.get(pk=request.GET.get('selectKayakId'))
-            quantity_range = list(range(1, kayak.stock + 1))
-            return render(request,
-                          'reservation/quantity_dropdown_list_options.html',
-                          {'quantity_range': quantity_range})
-
-        # if request.is_ajax() and request.GET.get('selectDate'):
-        #     kayaks_filter_date = Kayak.objects.filter(date=request.GET.get('selectDate'))
-        #     tmp = [detail.kayak for detail in self.get_object().details.all()]
-        #     arr = [(True, kayak) if kayak in tmp else (False, kayak) for kayak in kayaks_filter_date]
-        #     return render(request,
-        #                   'reservation/kayak_select_date_dropdown_list.html',
-        #                   {'kayaks_select_date': kayaks_filter_date})
-        return super(ReservationUpdateView, self).get(request, *args, **kwargs)
 
     # GET DYNAMIC DATE FIELD VALUE, POST JSON DATA WITH EXCLUDE TIME
     def post(self, request, *args, **kwargs):
@@ -150,18 +134,22 @@ class ReservationUpdateView(LoginRequiredMixin, UpdateView):
             select_date = request.POST.get('selectDate')
             reservations = Reservation.objects.filter(date=select_date)
             for reservation in reservations:
-                exclude_time.append((reservation.time.hour, reservation.time.minute))
+                if reservation != self.get_object():
+                    exclude_time.append((reservation.time.hour, reservation.time.minute))
             return JsonResponse({'exclude_time': exclude_time})
-        return super(ReservationUpdateView, self).post(*args, **kwargs)
+        return super(ReservationUpdateView, self).post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        kayaks = context['kayaks']
-        with transaction.atomic():
-            reservation = form.save()
-            if kayaks.is_valid():
-                kayaks.instance = reservation
-                kayaks.save()
+        # reservation = self.get_object()
+        if self.request.POST.get('full_phone'):
+            form.instance.phone = self.request.POST.get('full_phone')
+        # if reservation.date != form.cleaned_data['date']:
+        #     for detail in reservation.details.all():
+        #         stock_date_kayak = StockDateKayak.objects.get(kayak=detail.kayak, date=reservation.date)
+        #         stock_date_kayak.stock += detail.quantity
+        #         stock_date_kayak = StockDateKayak.objects.get(kayak=detail.kayak, date=form.cleaned_data['date'])
+        #         stock_date_kayak.stock -= detail.quantity
+        #
         return super(ReservationUpdateView, self).form_valid(form)
 
 
@@ -175,6 +163,17 @@ class ReservationDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         delete = super(ReservationDeleteView, self).delete(request, *args, **kwargs)
         return delete
+
+
+class KayakListView(LoginRequiredMixin, ListView):
+    model = Kayak
+    template_name = 'kayak/list.html'
+
+
+class RouteListView(LoginRequiredMixin, ListView):
+    model = Route
+    template_name = 'route/list.html'
+
 
 # class ReservationPayUPaymentView(DetailView):
 #     model = Reservation
