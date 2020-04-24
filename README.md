@@ -34,7 +34,23 @@ Simple booking kayak panel. WanPlac Booking is a panel that will make kayak book
 * [Pickadate.js] - https://amsul.ca/pickadate.js/
 * [Intl-tel-input] - https://github.com/jackocnr/intl-tel-input
 
-### Demonstrative Image
+#### RUN PANEL
+1. Install the requirements for the package:
+  ```sh
+    pip install -r requirements.txt
+  ```
+2. Make and apply migrations
+  ```sh
+    python manage.py makemigrations
+    python manage.py migrate
+  ```
+3. Run the server
+  ```sh
+    python manage.py runserver
+  ```
+4. Access from the browser at http://127.0.0.1:8000
+
+##### Demonstrative Image
 <p align="center">
   <img src="https://github.com/mstelwach/wanplac_booking/blob/master/demonstrative_image.png">
 </p>
